@@ -17,6 +17,12 @@ import javax.swing.GroupLayout;
 public class MainForm extends JPanel {
     public MainForm() {
         initComponents();
+        var addImage = Toolkit.getDefaultToolkit().getImage(App.class.getResource("/add.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        var removeImage = Toolkit.getDefaultToolkit().getImage(App.class.getResource("/remove.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        var ghImage = Toolkit.getDefaultToolkit().getImage(App.class.getResource("/github.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        this.getAdd().setIcon(new ImageIcon(addImage));
+        this.getRemove().setIcon(new ImageIcon(removeImage));
+        this.getGh().setIcon(new ImageIcon(ghImage));
     }
 
     private void initComponents() {
@@ -28,7 +34,7 @@ public class MainForm extends JPanel {
         remove = new JButton();
         gh = new JButton();
         scrollPane1 = new JScrollPane();
-        repositories = new JList();
+        repositories = new JList<>();
         detailsPanel = new JPanel();
         repositoryPath = new JLabel();
         scrollPane2 = new JScrollPane();
@@ -196,7 +202,7 @@ public class MainForm extends JPanel {
     private JButton remove;
     private JButton gh;
     private JScrollPane scrollPane1;
-    private JList repositories;
+    private JList<com.thoughtworks.gha.notifier.model.Repository> repositories;
     private JPanel detailsPanel;
     private JLabel repositoryPath;
     private JScrollPane scrollPane2;
