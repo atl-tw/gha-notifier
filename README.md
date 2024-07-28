@@ -16,7 +16,7 @@ The application will start and load to the system tray.
 
 ![System Tray](doc/systemtray.png)
 
-You may be prompted to locate the `gh` executable. You can download it from [here](https://cli.github.com/)." Once
+You may be prompted to locate the `gh` executable. You can download it from [here](https://cli.github.com/). Once
 installed click the GitHub icon on the configuration screen to select it.
 
 ![Configuration](doc/configuration.png)

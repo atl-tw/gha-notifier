@@ -32,6 +32,9 @@ new FormModel {
 					name: "scrollPane1"
 					add( new FormComponent( "javax.swing.JList" ) {
 						name: "repositories"
+						auxiliary() {
+							"JavaCodeGenerator.typeParameters": "com.thoughtworks.gha.notifier.model.Repository"
+						}
 					} )
 				} )
 			} )
