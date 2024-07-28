@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Data
 public class Configuration {
-
+    private String githubExecutable = "gh";
     private List<Repository> repositories = new ArrayList<>();
     private Map<String, State> lastStates = new HashMap<>();
     private Set<String> workflowsToNotify = new HashSet<>();

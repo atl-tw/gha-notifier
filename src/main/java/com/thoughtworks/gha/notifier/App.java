@@ -23,129 +23,150 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.LogManager;
 
 import static java.util.Optional.ofNullable;
 
 /**
  * Hello world!
- *
  */
 public class App {
-public static void main(String[] args) throws InterruptedException {
-    System.setProperty("apple.awt.UIElement", "true");
-    LafManager.install(new DarculaTheme());
-    final CountDownLatch latch = new CountDownLatch(1);
-    SwingUtilities.invokeLater(() -> {
-        new JFXPanel();
-        latch.countDown();
-    });
-    latch.await();
-    SwingUtilities.invokeLater(App::new);
-}
-private JFrame frame = new JFrame("GitHub Notifier");
-private MainForm mainForm = new MainForm();
-private final MonitorService configurationService = new MonitorService();
-private final Timer timer = new Timer(true);
-private java.util.List<Workflow> selectedWorkflows;
-private final ActionListener notifyCheckedListener = e1 -> {
-    if (selectedWorkflows == null) {
-        return;
-    }
-    selectedWorkflows.forEach(workflow -> {
-        if (mainForm.getNotify().isSelected()) {
-            configurationService.addWorkflowToNotify(workflow);
-        } else {
-            configurationService.removeWorkflowToNotify(workflow);
-        }
-    });
-};
-private final ActionListener mainBranchListener = e1 -> {
-    if (selectedWorkflows == null) {
-        return;
-    }
-    selectedWorkflows.forEach(workflow -> {
-        workflow.setMainBranch(mainForm.getMainBranch().getText());
-        configurationService.updateWorkflow(workflow);
-    });
-};
 
-@SuppressWarnings("unchecked")
-private App(){
+  public static final String GIT_HUB_NOTIFIER = "GitHub Actions Notifier";
+  private final MonitorService configurationService = new MonitorService();
+  private final Timer timer = new Timer(true);
+  private JFrame frame = new JFrame(GIT_HUB_NOTIFIER);
+  private MainForm mainForm = new MainForm();
+  private java.util.List<Workflow> selectedWorkflows;
+  private final ActionListener notifyCheckedListener = e1 -> {
+    if (selectedWorkflows == null) {
+      return;
+    }
+    selectedWorkflows.forEach(workflow -> {
+      if (mainForm.getNotify().isSelected()) {
+        configurationService.addWorkflowToNotify(workflow);
+      } else {
+        configurationService.removeWorkflowToNotify(workflow);
+      }
+    });
+  };
+  private final ActionListener mainBranchListener = e1 -> {
+    if (selectedWorkflows == null) {
+      return;
+    }
+    selectedWorkflows.forEach(workflow -> {
+      workflow.setMainBranch(mainForm.getMainBranch().getText());
+      configurationService.updateWorkflow(workflow);
+    });
+  };
+  @SuppressWarnings("unchecked")
+  private App() {
+    if(!configurationService.checkGitHub()){
+      JOptionPane.showMessageDialog(frame, "GitHub CLI not found. Please select the GitHub icon and locate it on your system.");
+    }
     mainForm.getAdd().addActionListener(e -> {
+      JFileChooser fileChooser = new JFileChooser();
+      fileChooser.setAcceptAllFileFilterUsed(false);
+      fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      fileChooser.addChoosableFileFilter(new FileFilter() {
+        @Override
+        public boolean accept(File f) {
+          return f.isDirectory();
+        }
+
+        @Override
+        public String getDescription() {
+          return "Git Repositories";
+        }
+      });
+      int option = fileChooser.showOpenDialog(frame);
+      if (option == JFileChooser.APPROVE_OPTION) {
+        File selectedDirectory = fileChooser.getSelectedFile();
+        if (!ofNullable(selectedDirectory.list((dir, name) -> ".git".equals(name))).map(files -> files.length > 0).orElse(false)) {
+          JOptionPane.showMessageDialog(frame,
+              "Selected directory is not a git repository: " + selectedDirectory.getAbsolutePath());
+          return;
+        }
+        try {
+          configurationService.addRepository(selectedDirectory);
+        } catch (GitHubException exception) {
+          JOptionPane.showMessageDialog(frame, exception.getMessage());
+        }
+      }
+    });
+    mainForm.getGh().addActionListener(e -> {
+      try {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setAcceptAllFileFilterUsed(false);
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         fileChooser.addChoosableFileFilter(new FileFilter() {
-            @Override
-            public boolean accept(File f) {
-                return f.isDirectory();
-            }
+          @Override
+          public boolean accept(File f) {
+            return f.isDirectory() || f.getName().equals("gh") || f.getName().equals("gh.exe");
+          }
 
-            @Override
-            public String getDescription() {
-                return "Git Repositories";
-            }
+          @Override
+          public String getDescription() {
+            return "GitHub CLI Executable";
+          }
         });
         int option = fileChooser.showOpenDialog(frame);
         if (option == JFileChooser.APPROVE_OPTION) {
-            File selectedDirectory = fileChooser.getSelectedFile();
-            if(!ofNullable(selectedDirectory.list((dir, name) -> ".git".equals(name))).map(files -> files.length > 0).orElse(false)){
-                JOptionPane.showMessageDialog(frame,
-                    "Selected directory is not a git repository: " + selectedDirectory.getAbsolutePath());
-                return;
-            }
-            try {
-                configurationService.addRepository(selectedDirectory);
-            } catch(GitHubException exception){
-                JOptionPane.showMessageDialog(frame, exception.getMessage());
-            }
+          File selectedDirectory = fileChooser.getSelectedFile();
+          configurationService.setGitHubExecutable(selectedDirectory);
+
         }
+      } catch (Exception exception) {
+        JOptionPane.showMessageDialog(frame, exception.getMessage());
+      }
     });
-    mainForm.getRemove().addActionListener(e->{
-        var selected = mainForm.getRepositories().getSelectedValuesList();
-        configurationService.removeRepositories(selected);
+    mainForm.getRemove().addActionListener(e -> {
+      var selected = mainForm.getRepositories().getSelectedValuesList();
+      configurationService.removeRepositories(selected);
     });
     mainForm.getRepositories().addListSelectionListener(e -> {
-        if (e.getValueIsAdjusting()) {
-            return;
-        }
-        var selected = mainForm.getRepositories().getSelectedValuesList();
-        if (selected == null || selected.size() > 1) {
-            mainForm.getDetailsPanel().setVisible(false);
-            return;
-        }
-        var repository = (Repository) selected.get(0);
-        mainForm.getDetailsPanel().setVisible(true);
-        mainForm.getRepositoryPath().setText("Workflows: "+
-            repository.getPath().substring(repository.getPath().lastIndexOf('/') + 1));
-        mainForm.getWorkflows().setListData(repository.getWorkflows().toArray(new Workflow[0]));
+      if (e.getValueIsAdjusting()) {
+        return;
+      }
+      var selected = mainForm.getRepositories().getSelectedValuesList();
+      if (selected == null || selected.size() > 1) {
+        mainForm.getDetailsPanel().setVisible(false);
+        return;
+      }
+      var repository = (Repository) selected.get(0);
+      mainForm.getDetailsPanel().setVisible(true);
+      mainForm.getRepositoryPath().setText("Workflows: " +
+          repository.getPath().substring(repository.getPath().lastIndexOf('/') + 1));
+      mainForm.getWorkflows().setListData(repository.getWorkflows().toArray(new Workflow[0]));
     });
     mainForm.getWorkflowConfig().setVisible(false);
     mainForm.getWorkflows().addListSelectionListener(e -> {
-        mainForm.getNotify().removeActionListener(this.notifyCheckedListener);
-        mainForm.getMainBranch().removeActionListener(this.mainBranchListener);
-        if (e.getValueIsAdjusting()) {
-            return;
-        }
-        var selected = mainForm.getWorkflows().getSelectedValuesList();
-        if (selected == null) {
-            mainForm.getWorkflowConfig().setVisible(false);
-            return;
-        }
-        mainForm.getWorkflowConfig().setVisible(true);
-        var notify = selected.stream().map(configurationService::workflowNotified).reduce((a, b) ->a || b ).orElse(false);
-        mainForm.getNotify().setSelected(notify);
-        if(selected.size() == 1){
-            mainForm.getMainBranch().setText(selected.get(0).getMainBranch());
-        }
-        mainForm.getNotify().addActionListener(this.notifyCheckedListener);
-        this.selectedWorkflows = selected;
+      mainForm.getNotify().removeActionListener(this.notifyCheckedListener);
+      mainForm.getMainBranch().removeActionListener(this.mainBranchListener);
+      if (e.getValueIsAdjusting()) {
+        return;
+      }
+      var selected = mainForm.getWorkflows().getSelectedValuesList();
+      if (selected == null) {
+        mainForm.getWorkflowConfig().setVisible(false);
+        return;
+      }
+      mainForm.getWorkflowConfig().setVisible(true);
+      var notify = selected.stream().map(configurationService::workflowNotified).reduce((a, b) -> a || b).orElse(false);
+      mainForm.getNotify().setSelected(notify);
+      if (selected.size() == 1) {
+        mainForm.getMainBranch().setText(selected.get(0).getMainBranch());
+      }
+      mainForm.getNotify().addActionListener(this.notifyCheckedListener);
+      this.selectedWorkflows = selected;
     });
 
     var add = Toolkit.getDefaultToolkit().getImage(App.class.getResource("/add.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
     var remove = Toolkit.getDefaultToolkit().getImage(App.class.getResource("/remove.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+    var gh = Toolkit.getDefaultToolkit().getImage(App.class.getResource("/github.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
     mainForm.getAdd().setIcon(new ImageIcon(add));
     mainForm.getRemove().setIcon(new ImageIcon(remove));
+    mainForm.getGh().setIcon(new ImageIcon(gh));
     frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     frame.setSize(1024, 600);
     frame.setLocationRelativeTo(null);
@@ -153,89 +174,110 @@ private App(){
     setupTray();
     configurationService.addPropertyChangeListener(
         "repositories", e -> SwingUtilities.invokeLater(
-            ()->
+            () ->
                 mainForm.getRepositories().setListData(configurationService.getRepositories().toArray())));
     mainForm.getRepositories().setListData(configurationService.getRepositories().toArray());
     frame.addWindowListener(new WindowAdapter() {
-        public void windowClosing(WindowEvent e) {
-            frame.setVisible(false);
-        }
+      public void windowClosing(WindowEvent e) {
+        frame.setVisible(false);
+      }
     });
     mainForm.getDetailsPanel().setVisible(false);
-    var closeable = Toast.toast(ToastType.INFO, App.class.getResource("/build.png").toString(), "GitHub Notifier", "Started");
+    var closeable = Toast.toast(ToastType.INFO, App.class.getResource("/build.png").toString(), GIT_HUB_NOTIFIER, "Started");
     timer.schedule(new TimerTask() {
-        @Override
-        public void run() {
-            Platform.runLater(()->{
-                try {
-                    closeable.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }});
-
-        }
-    }, 3000);
-    configurationService.addPropertyChangeListener("notify", e->{
-        var workflows = (Set<Workflow>) e.getNewValue();
-        workflows.forEach(w-> {
-            var state = configurationService.lastState(w);
-            var repository = configurationService.findRepository(w);
-            if(state == Configuration.State.SUCCESS){
-                var success = Toast.toast(ToastType.INFO, App.class.getResource("/build.png").toString(), "GitHub Notifier",
-                    "Workflow "+w.getName()+" on "+ repository.getPath().substring(repository.getPath().lastIndexOf('/') +1)+" is now successful.");
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        Platform.runLater(()->{
-                            try {
-                                success.close();
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }});
-
-                    }
-                }, 3000);
-            } else {
-              //noinspection resource
-              Toast.toast(ToastType.ERROR, App.class.getResource("/build.png").toString(), "GitHub Notifier",
-                    "Workflow "+w.getName()+" on "+ repository.getPath().substring(repository.getPath().lastIndexOf('/') +1)+" is failing.");
-            }
+      @Override
+      public void run() {
+        Platform.runLater(() -> {
+          try {
+            closeable.close();
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
         });
+
+      }
+    }, 3000);
+    configurationService.addPropertyChangeListener("notify", e -> {
+      var workflows = (Set<Workflow>) e.getNewValue();
+      workflows.forEach(w -> {
+        var state = configurationService.lastState(w);
+        var repository = configurationService.findRepository(w);
+        if (state == Configuration.State.SUCCESS) {
+          var success = Toast.toast(ToastType.INFO, App.class.getResource("/build.png").toString(), GIT_HUB_NOTIFIER,
+              "Workflow " + w.getName() + " on " + repository.getPath().substring(repository.getPath().lastIndexOf('/') + 1) + " is now successful.");
+          timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+              Platform.runLater(() -> {
+                try {
+                  success.close();
+                } catch (IOException e) {
+                  throw new RuntimeException(e);
+                }
+              });
+
+            }
+          }, 3000);
+        } else {
+          //noinspection resource
+          Toast.toast(ToastType.ERROR, App.class.getResource("/build.png").toString(), GIT_HUB_NOTIFIER,
+              "Workflow " + w.getName() + " on " + repository.getPath().substring(repository.getPath().lastIndexOf('/') + 1) + " is failing.");
+        }
+      });
     });
 
-}
+  }
 
-private void showWindow(){
+  public static void main(String[] args) throws InterruptedException {
+    System.setProperty("apple.awt.UIElement", "true");
+    try (var configFile = App.class.getResourceAsStream("/logging.properties")) {
+      LogManager.getLogManager().readConfiguration(configFile);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    LafManager.install(new DarculaTheme());
+    final CountDownLatch latch = new CountDownLatch(1);
+    SwingUtilities.invokeLater(() -> {
+      new JFXPanel();
+      latch.countDown();
+    });
+    latch.await();
+    SwingUtilities.invokeLater(App::new);
+  }
+
+  private void showWindow() {
     frame.setVisible(true);
     frame.setExtendedState(JFrame.NORMAL);
     frame.toFront();
     frame.repaint();
-}
-private void setupTray() {
+  }
+
+  private void setupTray() {
     if (SystemTray.isSupported()) {
-        SystemTray tray = SystemTray.getSystemTray();
-        Image image = Toolkit.getDefaultToolkit().getImage(App.class.getResource("/build.png"));
-        PopupMenu popup = new PopupMenu();
-        TrayIcon trayIcon = new TrayIcon(image, "System Tray Example", popup);
-        trayIcon.setImageAutoSize(true);
-        MenuItem restoreItem = new MenuItem("Show Configuration");
-        restoreItem.addActionListener(e -> SwingUtilities.invokeLater(this::showWindow));
+      SystemTray tray = SystemTray.getSystemTray();
+      Image image = Toolkit.getDefaultToolkit().getImage(App.class.getResource("/build.png"));
+      PopupMenu popup = new PopupMenu();
+      TrayIcon trayIcon = new TrayIcon(image, "System Tray Example", popup);
+      trayIcon.setImageAutoSize(true);
+      MenuItem restoreItem = new MenuItem("Show Configuration");
+      restoreItem.addActionListener(e -> SwingUtilities.invokeLater(this::showWindow));
 
-        MenuItem exitItem = new MenuItem("Quit");
-        exitItem.addActionListener(e -> System.exit(0));
+      MenuItem exitItem = new MenuItem("Quit");
+      exitItem.addActionListener(e -> System.exit(0));
 
-        popup.add(restoreItem);
-        popup.add(exitItem);
+      popup.add(restoreItem);
+      popup.add(exitItem);
 
-        trayIcon.addActionListener(e -> showWindow());
+      trayIcon.addActionListener(e -> showWindow());
 
-        try {
-            tray.add(trayIcon);
-        } catch (AWTException ex) {
-            ex.printStackTrace();
-        }
+      try {
+        tray.add(trayIcon);
+      } catch (AWTException ex) {
+        ex.printStackTrace();
+      }
     } else {
-        System.err.println("System tray not supported!");
+      System.err.println("System tray not supported!");
     }
-}
+  }
 }

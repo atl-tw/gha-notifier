@@ -6,13 +6,16 @@ import com.thoughtworks.gha.notifier.model.Configuration;
 import com.thoughtworks.gha.notifier.model.Repository;
 import com.thoughtworks.gha.notifier.model.Workflow;
 import lombok.Data;
+import lombok.Setter;
 import lombok.SneakyThrows;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class GH {
@@ -20,28 +23,38 @@ public class GH {
   private static final Logger LOGGER = Logger.getLogger("GH");
   public static final String RECENT_RUNS = "Recent runs"+System.lineSeparator();
   private final ObjectMapper mapper;
+  @Setter
+  private String executable;
 
-  public GH(ObjectMapper mapper) {
+  public GH(ObjectMapper mapper, String githubExecutable) {
     this.mapper = mapper;
+    this.executable = githubExecutable;
   }
 
-  @SneakyThrows
+
   public List<Workflow> listWorkflows(File path) {
-    LOGGER.info("Listing workflows in " + path);
-    var proc = new ProcessBuilder("gh", "workflow", "list", "--json", "id,name,path,state")
-        .directory(path).start();
-    var result = new String(proc.getInputStream().readAllBytes());
-    var error = new String(proc.getErrorStream().readAllBytes());
-    if (!error.isBlank()) {
-      LOGGER.severe("Error listing workflows: " + error);
-      throw new GitHubException(error);
+    try {
+      LOGGER.info("Listing workflows in " + path);
+      var proc = new ProcessBuilder(executable, "workflow", "list", "--json", "id,name,path,state")
+          .directory(path).start();
+      var result = new String(proc.getInputStream().readAllBytes());
+      var error = new String(proc.getErrorStream().readAllBytes());
+      if (!error.isBlank()) {
+        LOGGER.severe("Error listing workflows: " + error);
+        throw new GitHubException(error);
+      }
+      LOGGER.info("Found workflows in " + path + " " + result);
+      return mapper.readValue(result, new TypeReference<>() {
+      });
+    } catch(Exception e){
+      LOGGER.log(Level.SEVERE, "Error listing workflows", e);
+      return Collections.emptyList();
     }
-    return mapper.readValue(result, new TypeReference<>(){});
   }
 
   @SneakyThrows
   public Configuration.State queryState(Repository repository, Workflow workflow){
-    var proc = new ProcessBuilder("gh", "workflow", "view", workflow.getId())
+    var proc = new ProcessBuilder(executable, "workflow", "view", workflow.getId())
         .directory(new File(repository.getPath())).start();
     var result = new String(proc.getInputStream().readAllBytes());
     var executions = parseExecutions(result);
@@ -79,6 +92,20 @@ public class GH {
     } catch (Exception e){
       LOGGER.severe("Error parsing line: "+line);
       return null;
+    }
+  }
+
+  public boolean checkGitHub() {
+    try {
+      var proc = new ProcessBuilder(executable, "--help").start();
+      var error = new String(proc.getErrorStream().readAllBytes());
+      if (!error.isBlank()) {
+        LOGGER.severe("Error listing workflows: " + error);
+      }
+      return true;
+    } catch(Exception e){
+      LOGGER.log(Level.SEVERE, "Error checking GitHub", e);
+      return false;
     }
   }
 
