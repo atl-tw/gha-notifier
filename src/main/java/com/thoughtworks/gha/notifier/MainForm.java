@@ -26,6 +26,7 @@ public class MainForm extends JPanel {
         toolBar1 = new JToolBar();
         add = new JButton();
         remove = new JButton();
+        gh = new JButton();
         scrollPane1 = new JScrollPane();
         repositories = new JList();
         detailsPanel = new JPanel();
@@ -53,6 +54,7 @@ public class MainForm extends JPanel {
                 //---- remove ----
                 remove.setToolTipText("Remove Selected Repositories");
                 toolBar1.add(remove);
+                toolBar1.add(gh);
             }
 
             //======== scrollPane1 ========
@@ -192,6 +194,7 @@ public class MainForm extends JPanel {
     private JToolBar toolBar1;
     private JButton add;
     private JButton remove;
+    private JButton gh;
     private JScrollPane scrollPane1;
     private JList repositories;
     private JPanel detailsPanel;

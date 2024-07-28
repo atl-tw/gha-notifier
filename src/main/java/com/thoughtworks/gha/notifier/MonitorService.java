@@ -22,7 +22,7 @@ public class MonitorService {
   private final File configFile = new File(System.getProperty("user.home"), ".gha-notifier.json");
   private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
   private final ObjectMapper mapper = new ObjectMapper();
-  private final GH gh = new GH(mapper);
+  private final GH gh;
   private Configuration configuration = new Configuration();
   private final Timer timer = new Timer(true);
 
@@ -33,6 +33,7 @@ public class MonitorService {
     } else {
       configuration = mapper.readValue(configFile, Configuration.class);
     }
+    gh = new GH(mapper, configuration.getGithubExecutable());
     timer.schedule(new TimerTask() {
       @Override
       public void run() {
@@ -116,5 +117,15 @@ public class MonitorService {
 
   public Repository findRepository(Workflow w) {
     return configuration.getRepositories().stream().filter(r->r.getWorkflows().contains(w)).findFirst().orElse(null);
+  }
+
+  public void setGitHubExecutable(File selectedDirectory) {
+    configuration.setGithubExecutable(selectedDirectory.getAbsolutePath());
+    gh.setExecutable(selectedDirectory.getAbsolutePath());
+    saveConfig();
+  }
+
+  public boolean checkGitHub() {
+    return gh.checkGitHub();
   }
 }

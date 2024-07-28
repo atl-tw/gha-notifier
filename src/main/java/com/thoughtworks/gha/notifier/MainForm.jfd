@@ -24,6 +24,9 @@ new FormModel {
 						name: "remove"
 						"toolTipText": "Remove Selected Repositories"
 					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "gh"
+					} )
 				} )
 				add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
 					name: "scrollPane1"
