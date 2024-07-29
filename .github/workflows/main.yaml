@@ -50,7 +50,7 @@ jobs:
         run: |
           ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
       - name: Build RPM
-        run: ./mvnw --batch-mode -Plinux-rpm clean install
+        run: ./mvnw --batch-mode -Plinux-rpm install
       - name: Build RPM
         run: ./mvnw --batch-mode -Plinux-rpm install
       - name: 'Upload Jar'

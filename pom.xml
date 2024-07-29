@@ -113,8 +113,9 @@
                                     <goal>jpackage</goal>
                                 </goals>
                                 <configuration>
-                                    <name>GHA Notifier</name>
+                                    <name>GitHub Actions Notifier</name>
                                     <mainjar>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</mainjar>
+                                    <mainclass>${mainClassName}</mainclass>
                                     <appversion>${project.version}</appversion>
                                     <icon>${project.basedir}/src/bundle/icon.png</icon>
                                     <input>${project.basedir}/src/bundle/input</input>
@@ -145,8 +146,9 @@
                                     <goal>jpackage</goal>
                                 </goals>
                                 <configuration>
-                                    <name>GHA Notifier</name>
+                                    <name>GitHub Actions Notifier</name>
                                     <mainjar>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</mainjar>
+                                    <mainclass>${mainClassName}</mainclass>
                                     <appversion>${project.version}</appversion>
                                     <icon>${project.basedir}/src/bundle/icon.png</icon>
                                     <input>${project.basedir}/src/bundle/input</input>
