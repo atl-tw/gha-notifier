@@ -111,7 +111,29 @@ public class GitHubNotifier {
     }, 3000);
   }
 
-  private void onAddRepository(ActionEvent e){
+  public static void main(String[] args) throws InterruptedException {
+    System.setProperty("apple.awt.UIElement", "true");
+    try (var configFile = GitHubNotifier.class.getResourceAsStream("/logging.properties")) {
+      LogManager.getLogManager().readConfiguration(configFile);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    FlatLightLaf.setup();
+    try {
+      UIManager.setLookAndFeel(new FlatDarkLaf());
+    } catch (UnsupportedLookAndFeelException e) {
+      Logger.getAnonymousLogger().log(Level.WARNING, "Failed to load LAF", e);
+    }
+    final CountDownLatch latch = new CountDownLatch(1);
+    SwingUtilities.invokeLater(() -> {
+      new JFXPanel();
+      latch.countDown();
+    });
+    latch.await();
+    SwingUtilities.invokeLater(GitHubNotifier::new);
+  }
+
+  private void onAddRepository(ActionEvent e) {
     JFileChooser fileChooser = new JFileChooser();
     fileChooser.setAcceptAllFileFilterUsed(false);
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -142,12 +164,12 @@ public class GitHubNotifier {
     }
   }
 
-  private void onRemoveRepositories(ActionEvent e){
+  private void onRemoveRepositories(ActionEvent e) {
     var selected = mainForm.getRepositories().getSelectedValuesList();
     configurationService.removeRepositories(selected);
   }
 
-  private void onWorkflowSelected(ListSelectionEvent e){
+  private void onWorkflowSelected(ListSelectionEvent e) {
     mainForm.getNotify().removeActionListener(this.notifyCheckedListener);
     mainForm.getMainBranch().removeActionListener(this.mainBranchListener);
     if (e.getValueIsAdjusting()) {
@@ -166,27 +188,6 @@ public class GitHubNotifier {
     }
     mainForm.getNotify().addActionListener(this.notifyCheckedListener);
     this.selectedWorkflows = selected;
-  }
-  public static void main(String[] args) throws InterruptedException {
-    System.setProperty("apple.awt.UIElement", "true");
-    try (var configFile = GitHubNotifier.class.getResourceAsStream("/logging.properties")) {
-      LogManager.getLogManager().readConfiguration(configFile);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    FlatLightLaf.setup();
-    try {
-      UIManager.setLookAndFeel( new FlatDarkLaf() );
-    } catch (UnsupportedLookAndFeelException e) {
-      Logger.getAnonymousLogger().log(Level.WARNING, "Failed to load LAF", e);
-    }
-    final CountDownLatch latch = new CountDownLatch(1);
-    SwingUtilities.invokeLater(() -> {
-      new JFXPanel();
-      latch.countDown();
-    });
-    latch.await();
-    SwingUtilities.invokeLater(GitHubNotifier::new);
   }
 
   private void onGitHubSelect(ActionEvent event) {
@@ -236,9 +237,9 @@ public class GitHubNotifier {
 
   private void onRepositoriesChange(PropertyChangeEvent e) {
     SwingUtilities.invokeLater(
-        () ->{
-            mainForm.getRepositories().setListData(configurationService.getRepositories().toArray(new Repository[0]));
-            mainForm.getWorkflowConfig().setVisible(false);
+        () -> {
+          mainForm.getRepositories().setListData(configurationService.getRepositories().toArray(new Repository[0]));
+          mainForm.getWorkflowConfig().setVisible(false);
         });
   }
 
@@ -248,8 +249,11 @@ public class GitHubNotifier {
       var state = configurationService.lastState(w);
       var repository = configurationService.findRepository(w);
       if (state == Configuration.State.SUCCESS) {
-        var success = Toast.toast(ToastType.INFO, GitHubNotifier.class.getResource(BUILD_PNG).toString(), GIT_HUB_NOTIFIER,
-            "Workflow " + w.getName() + " on " + repository.getPath().substring(repository.getPath().lastIndexOf('/') + 1) + " is now successful.");
+        @SuppressWarnings("resource") var success =
+            Toast.toast(ToastType.INFO, Objects.requireNonNull(GitHubNotifier.class.getResource(BUILD_PNG)).toString(),
+                GIT_HUB_NOTIFIER,
+                "Workflow " + w.getName() + " on " +
+                    repository.getPath().substring(repository.getPath().lastIndexOf('/') + 1) + " is now successful.");
         timer.schedule(new TimerTask() {
           @Override
           public void run() {
