@@ -102,11 +102,11 @@ jobs:
           jpackage \
             --dest /__w/gha-notifier/gha-notifier/target/jpackage \
             --type rpm \
-            --app-version '1.0.${{github.run.number}}' \
+            --app-version '1.0.${{github.run_number}}' \
             --name 'GitHub Actions Notifier' \
             --icon /__w/gha-notifier/gha-notifier/src/bundle/icon.png \
             --input /__w/gha-notifier/gha-notifier/src/bundle \
-            --main-jar '/__w/gha-notifier/gha-notifier/target/gha-notifier-1.0.${{github.run.number}}-shaded.jar' \
+            --main-jar '/__w/gha-notifier/gha-notifier/target/gha-notifier-1.0.${{github.run_number}}-shaded.jar' \
             --main-class com.thoughtworks.gha.notifier.GitHubNotifier \
             --linux-menu-group 'Developer' \
             --linux-app-category 'Developer' \
