@@ -17,9 +17,9 @@ import javax.swing.GroupLayout;
 public class MainForm extends JPanel {
     public MainForm() {
         initComponents();
-        var addImage = Toolkit.getDefaultToolkit().getImage(App.class.getResource("/add.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
-        var removeImage = Toolkit.getDefaultToolkit().getImage(App.class.getResource("/remove.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
-        var ghImage = Toolkit.getDefaultToolkit().getImage(App.class.getResource("/github.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        var addImage = Toolkit.getDefaultToolkit().getImage(MainForm.class.getResource("/add.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        var removeImage = Toolkit.getDefaultToolkit().getImage(MainForm.class.getResource("/remove.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+        var ghImage = Toolkit.getDefaultToolkit().getImage(MainForm.class.getResource("/github.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
         this.getAdd().setIcon(new ImageIcon(addImage));
         this.getRemove().setIcon(new ImageIcon(removeImage));
         this.getGh().setIcon(new ImageIcon(ghImage));
