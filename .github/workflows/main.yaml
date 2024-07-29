@@ -85,7 +85,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Install tools
         run: |
-          yum -y install jq git libxml2 curl zip unzip tar gzip gcc zlib-devel fakeroot
+          yum -y install jq git libxml2 curl zip unzip tar gzip gcc zlib-devel fakeroot rpm-build
       - uses: sdkman/sdkman-action@main
         id: sdkman
         with:
@@ -140,8 +140,8 @@ jobs:
       - name: 'Upload Mac Binary'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}-ARM64.dmg
-          path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-ARM64_${{ needs.project-info.outputs.PROJECT_VERSION }}.dmg
+          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}-ARM_64.dmg
+          path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-ARM_64_${{ needs.project-info.outputs.PROJECT_VERSION }}.dmg
           retention-days: 1
           if-no-files-found: error
   mac-intel:
@@ -166,7 +166,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}-x86_64.dmg
-          path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-x86_64_{{ needs.project-info.outputs.PROJECT_VERSION }}.dmg
+          path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-x86_64_${{ needs.project-info.outputs.PROJECT_VERSION }}.dmg
           retention-days: 1
           if-no-files-found: error
 
