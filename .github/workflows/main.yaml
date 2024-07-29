@@ -175,7 +175,7 @@ jobs:
           ./mvnw -U --batch-mode versions:set dependency:tree "-DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}"
       - name: Build
         run: |
-          ./mvnw --batch-mode --Pwindows-msi install
+          ./mvnw --batch-mode -Pwindows-msi install
           dir target\jpackage
       - name: 'Upload Windows Binary'
         uses: actions/upload-artifact@v4
