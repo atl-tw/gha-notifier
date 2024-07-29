@@ -50,7 +50,9 @@ jobs:
         run: |
           ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
       - name: Build RPM
-        run: ./mvnw --batch-mode -Plinux-rpm install
+        run: ./mvnw --batch-mode  install
+      - name: JP
+        run: jpackage  --dest /__w/gha-notifier/gha-notifier/target/jpackage  --type rpm --app-version '1.0.2' --name 'GitHub Actions Notifier' --icon /__w/gha-notifier/gha-notifier/src/bundle/icon.png  --input /__w/gha-notifier/gha-notifier/src/bundle  --main-jar '/__w/gha-notifier/gha-notifier/target/gha-notifier-1.0.2-shaded.jar'  --main-class com.thoughtworks.gha.notifier.GitHubNotifier  --linux-menu-group 'Developer'  --linux-app-category 'Developer'  --linux-shortcut
       - name: Build RPM
         run: ./mvnw --batch-mode -Plinux-rpm install
       - name: 'Upload Jar'
