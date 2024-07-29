@@ -98,7 +98,19 @@ jobs:
           ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
       - name: Build RPM
         run: |
-          JAVA_HOME=/github/home/.sdkman/candidates/java/current ./mvnw -Plinux-rpm --batch-mode  install
+          JAVA_HOME=/github/home/.sdkman/candidates/java/current ./mvnw  --batch-mode  install
+          jpackage \
+            --dest /__w/gha-notifier/gha-notifier/target/jpackage \
+            --type rpm \
+            --app-version '1.0.${{github.run.number}}' \
+            --name 'GitHub Actions Notifier' \
+            --icon /__w/gha-notifier/gha-notifier/src/bundle/icon.png \
+            --input /__w/gha-notifier/gha-notifier/src/bundle \
+            --main-jar '/__w/gha-notifier/gha-notifier/target/gha-notifier-1.0.${{github.run.number}}-shaded.jar' \
+            --main-class com.thoughtworks.gha.notifier.GitHubNotifier \
+            --linux-menu-group 'Developer' \
+            --linux-app-category 'Developer' \
+            --linux-shortcut
           ls target/jpackage
       - name: 'Upload RPM'
         uses: actions/upload-artifact@v4
@@ -149,7 +161,7 @@ jobs:
         run: |
           ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
       - name: Build
-        run: ./mvnw --batch-mode -Pmac-arm clean package && ls target
+        run: ./mvnw --batch-mode -Pmac-intel clean package && ls target
       - name: 'Upload Mac Binary'
         uses: actions/upload-artifact@v4
         with:
