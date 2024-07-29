@@ -28,7 +28,7 @@ jobs:
           PROJECT_ARTIFACT=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="artifactId"]/text()' pom.xml)
           echo "PROJECT_ARTIFACT=${PROJECT_ARTIFACT}"
           echo "PROJECT_ARTIFACT=${PROJECT_ARTIFACT}" >> $GITHUB_OUTPUT
-  linux-build:
+  linux-deb:
     needs: project-info
     runs-on: ubuntu-latest
     container:
@@ -78,7 +78,60 @@ jobs:
       - name: 'Upload DEB'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.deb
-          path: ./target/jpackage/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.deb
+          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}_${{ needs.project-info.outputs.PROJECT_VERSION }}_amd64.deb
+          path: ./target/jpackage/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}_amd64.deb
+          retention-days: 1
+          if-no-files-found: error
+  linux-rpm:
+    needs: project-info
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Install tools
+        run: |
+          yum -y install jq git libxml2-utils nsis curl zip unzip tar gzip gcc zlib1g-dev fakeroot
+      - uses: sdkman/sdkman-action@main
+        id: sdkman
+        with:
+          candidate: java
+          version: 21.0.2-open
+      - run: java -version
+      - run: which java && java -version && echo $JAVA_HOME
+      - name: Set Version
+        run: |
+          ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
+      - name: Build DEB
+        run: |
+          JAVA_HOME=/github/home/.sdkman/candidates/java/current ./mvnw -Plinux-rpm --batch-mode  install
+          ls target/jpackage
+      - name: 'Upload Jar'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.jar
+          path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.jar
+          retention-days: 1
+          if-no-files-found: error
+      - name: 'Upload Shaded'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}-shaded.jar
+          path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}-shaded.jar
+          retention-days: 1
+          if-no-files-found: error
+      #      - name: 'Upload RPM'
+      #        uses: actions/upload-artifact@v4
+      #        with:
+      #          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.rpm
+      #          path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.rpm
+      #          retention-days: 1
+      #          if-no-files-found: error
+      - name: 'Upload DEB'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}_${{ needs.project-info.outputs.PROJECT_VERSION }}_amd64.deb
+          path: ./target/jpackage/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}_amd64.deb
           retention-days: 1
           if-no-files-found: error
