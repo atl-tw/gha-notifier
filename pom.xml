@@ -46,34 +46,9 @@
             <version>11.2.1</version>
         </dependency>
         <dependency>
-            <groupId>com.github.weisj</groupId>
-            <artifactId>darklaf-core</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.weisj</groupId>
-            <artifactId>darklaf-platform-base</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.weisj</groupId>
-            <artifactId>darklaf-platform-decorations</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.weisj</groupId>
-            <artifactId>darklaf-compatibility</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.weisj</groupId>
-            <artifactId>swing-extensions-dsl</artifactId>
-            <version>0.1.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.weisj</groupId>
-            <artifactId>jsvg</artifactId>
-            <version>1.6.0</version>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.5</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -93,7 +68,7 @@
                     <nativeBinary>ARM_64</nativeBinary>
                     <plist>
                         <CFBundleIconFile>src/bundle/icons.icns</CFBundleIconFile>
-                        <JVMMainClassName>com.thoughtworks.gha.notifier.App</JVMMainClassName>
+                        <JVMMainClassName>com.thoughtworks.gha.notifier.GitHubNotifier</JVMMainClassName>
                         <CFBundleDisplayName>GitHub Actions Notifier</CFBundleDisplayName>
                         <CFBundleDevelopmentRegion>English</CFBundleDevelopmentRegion>
                         <CFBundleURLTypes>
@@ -107,6 +82,7 @@
                     </dmg>
                     <jdk>
                         <include>true</include>
+                        <location>${project.basedir}/jre-17.0.12.jre</location>
                     </jdk>
                 </configuration>
                 <executions>

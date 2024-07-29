@@ -1,7 +1,7 @@
 package com.thoughtworks.gha.notifier;
 
-import com.github.weisj.darklaf.LafManager;
-import com.github.weisj.darklaf.theme.DarculaTheme;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import com.sshtools.twoslices.Toast;
 import com.sshtools.twoslices.ToastType;
 import com.thoughtworks.gha.notifier.gh.GitHubException;
@@ -27,14 +27,16 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 import static java.util.Optional.ofNullable;
 
 /**
  * Hello world!
  */
-public class App {
+public class GitHubNotifier {
 
   public static final String GIT_HUB_NOTIFIER = "GitHub Actions Notifier";
   public static final String BUILD_PNG = "/build.png";
@@ -64,9 +66,10 @@ public class App {
       configurationService.updateWorkflow(workflow);
     });
   };
+  private JTrayIcon trayIcon;
 
   @SuppressWarnings("unchecked")
-  private App() {
+  private GitHubNotifier() {
     if (!configurationService.checkGitHub()) {
       JOptionPane.showMessageDialog(frame, "GitHub CLI not found. Please select the GitHub icon and locate it on your system.");
     }
@@ -81,6 +84,7 @@ public class App {
     frame.setSize(1024, 600);
     frame.setLocationRelativeTo(null);
     frame.setContentPane(mainForm);
+    frame.setAlwaysOnTop(true);
     mainForm.getWorkflowConfig().setVisible(false);
     setupTray();
 
@@ -92,7 +96,7 @@ public class App {
       }
     });
     mainForm.getDetailsPanel().setVisible(false);
-    var closeable = Toast.toast(ToastType.INFO, Objects.requireNonNull(App.class.getResource(BUILD_PNG)).toString(), GIT_HUB_NOTIFIER, "Started");
+    var closeable = Toast.toast(ToastType.INFO, Objects.requireNonNull(GitHubNotifier.class.getResource(BUILD_PNG)).toString(), GIT_HUB_NOTIFIER, "Started");
     timer.schedule(new TimerTask() {
       @Override
       public void run() {
@@ -165,20 +169,24 @@ public class App {
   }
   public static void main(String[] args) throws InterruptedException {
     System.setProperty("apple.awt.UIElement", "true");
-    try (var configFile = App.class.getResourceAsStream("/logging.properties")) {
+    try (var configFile = GitHubNotifier.class.getResourceAsStream("/logging.properties")) {
       LogManager.getLogManager().readConfiguration(configFile);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-
-    LafManager.install(new DarculaTheme());
+    FlatLightLaf.setup();
+    try {
+      UIManager.setLookAndFeel( new FlatDarkLaf() );
+    } catch (UnsupportedLookAndFeelException e) {
+      Logger.getAnonymousLogger().log(Level.WARNING, "Failed to load LAF", e);
+    }
     final CountDownLatch latch = new CountDownLatch(1);
     SwingUtilities.invokeLater(() -> {
       new JFXPanel();
       latch.countDown();
     });
     latch.await();
-    SwingUtilities.invokeLater(App::new);
+    SwingUtilities.invokeLater(GitHubNotifier::new);
   }
 
   private void onGitHubSelect(ActionEvent event) {
@@ -223,12 +231,15 @@ public class App {
     mainForm.getRepositoryPath().setText("Workflows: " +
         repository.getPath().substring(repository.getPath().lastIndexOf('/') + 1));
     mainForm.getWorkflows().setListData(repository.getWorkflows().toArray(new Workflow[0]));
+    mainForm.getWorkflowConfig().setVisible(false);
   }
 
   private void onRepositoriesChange(PropertyChangeEvent e) {
     SwingUtilities.invokeLater(
-        () ->
-            mainForm.getRepositories().setListData(configurationService.getRepositories().toArray(new Repository[0])));
+        () ->{
+            mainForm.getRepositories().setListData(configurationService.getRepositories().toArray(new Repository[0]));
+            mainForm.getWorkflowConfig().setVisible(false);
+        });
   }
 
   private void notifyOnStateChange(PropertyChangeEvent e) {
@@ -237,7 +248,7 @@ public class App {
       var state = configurationService.lastState(w);
       var repository = configurationService.findRepository(w);
       if (state == Configuration.State.SUCCESS) {
-        var success = Toast.toast(ToastType.INFO, App.class.getResource(BUILD_PNG).toString(), GIT_HUB_NOTIFIER,
+        var success = Toast.toast(ToastType.INFO, GitHubNotifier.class.getResource(BUILD_PNG).toString(), GIT_HUB_NOTIFIER,
             "Workflow " + w.getName() + " on " + repository.getPath().substring(repository.getPath().lastIndexOf('/') + 1) + " is now successful.");
         timer.schedule(new TimerTask() {
           @Override
@@ -254,7 +265,7 @@ public class App {
         }, 3000);
       } else {
         //noinspection resource
-        Toast.toast(ToastType.ERROR, App.class.getResource(BUILD_PNG).toString(), GIT_HUB_NOTIFIER,
+        Toast.toast(ToastType.ERROR, GitHubNotifier.class.getResource(BUILD_PNG).toString(), GIT_HUB_NOTIFIER,
             "Workflow " + w.getName() + " on " + repository.getPath().substring(repository.getPath().lastIndexOf('/') + 1) + " is failing.");
       }
     });
@@ -271,12 +282,10 @@ public class App {
   private void setupTray() {
     if (SystemTray.isSupported()) {
       SystemTray tray = SystemTray.getSystemTray();
-      Image image = Toolkit.getDefaultToolkit().getImage(App.class.getResource(BUILD_PNG));
+      Image image = Toolkit.getDefaultToolkit().getImage(GitHubNotifier.class.getResource(BUILD_PNG));
       JPopupMenu popup = new JPopupMenu();
-      JTrayIcon trayIcon = new JTrayIcon(image, "System Tray Example");
-      trayIcon.setMenu(popup);
+      this.trayIcon = new JTrayIcon(image, "System Tray Example", popup);
       trayIcon.setImageAutoSize(true);
-
       JMenuItem restoreItem = new JMenuItem("Show Configuration");
       restoreItem.setPreferredSize(new Dimension(200, 20));
       restoreItem.addActionListener(e -> SwingUtilities.invokeLater(this::showWindow));
