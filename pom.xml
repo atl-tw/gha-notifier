@@ -180,10 +180,10 @@
                                 </goals>
                                 <configuration>
                                     <name>GitHub Actions Notifier</name>
-                                    <mainjar>${project.build.directory}\${project.artifactId}-${project.version}-shaded.jar</mainjar>
+                                    <mainjar>target\${project.artifactId}-${project.version}-shaded.jar</mainjar>
                                     <appversion>${project.version}</appversion>
-                                    <icon>${project.basedir}\src\bundle\icon.ico</icon>
-                                    <input>${project.basedir}\src\bundle\input</input>
+                                    <icon>src\bundle\icon.ico</icon>
+                                    <input>src\bundle\input</input>
                                     <type>MSI</type>
                                     <winmenu>true</winmenu>
                                     <winshortcut>true</winshortcut>
