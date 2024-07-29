@@ -107,3 +107,30 @@ jobs:
           path: ./target/jpackage/github-actions-notifier_${{ needs.project-info.outputs.PROJECT_VERSION }}.rpm
           retention-days: 1
           if-no-files-found: error
+  mac-build:
+    needs: project-info
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - uses: sdkman/sdkman-action@main
+        id: sdkman
+        with:
+          candidate: java
+          version: 21.0.2-open
+        name: Java Info
+      - run: java -version && echo $JAVA_HOME
+      - name: Set Version
+        run: |
+          ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
+      - name: Build
+        run: ./mvnw --batch-mode -Pmac-arm clean package && ls target
+      - name: 'Upload Mac Binary'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}-ARM64.dmg
+          path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-ARM64_${{ needs.project-info.outputs.PROJECT_VERSION }}.dmg
+          retention-days: 1
+          if-no-files-found: error
+
+
