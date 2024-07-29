@@ -1,4 +1,4 @@
-package com.thoughtworks.gha.notifier;
+package com.thoughtworks.gha.notifier.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.gha.notifier.gh.GH;
@@ -82,6 +82,7 @@ public class MonitorService {
   }
 
   private void queryStates(){
+    pcs.firePropertyChange("running", null, true);
     var workflowsToNotify = new LinkedHashSet<Workflow>();
     configuration.getRepositories()
         .forEach(repository -> repository.getWorkflows()
@@ -134,5 +135,9 @@ public class MonitorService {
 
   public void browse(Repository repository) {
     gh.browse(repository.getPath());
+  }
+
+  public boolean anyFailures() {
+    return this.configuration.getLastStates().values().stream().anyMatch(s->s == Configuration.State.FAILURE);
   }
 }

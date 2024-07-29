@@ -2,9 +2,11 @@
  * Created by JFormDesigner on Sat Jul 27 21:16:02 EDT 2024
  */
 
-package com.thoughtworks.gha.notifier;
+package com.thoughtworks.gha.notifier.view;
 
 import java.awt.*;
+
+import com.thoughtworks.gha.notifier.GitHubNotifier;
 import lombok.Getter;
 
 import javax.swing.*;

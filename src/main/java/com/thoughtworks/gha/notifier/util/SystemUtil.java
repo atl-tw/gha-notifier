@@ -1,12 +1,12 @@
-package com.thoughtworks.gha.notifier;
+package com.thoughtworks.gha.notifier.util;
 
 import java.io.File;
 
-import static com.thoughtworks.gha.notifier.SystemUtil.OS.MAC_OS_X;
-import static com.thoughtworks.gha.notifier.SystemUtil.OS.OS2;
-import static com.thoughtworks.gha.notifier.SystemUtil.OS.UNKNOWN;
-import static com.thoughtworks.gha.notifier.SystemUtil.OS.VMS;
-import static com.thoughtworks.gha.notifier.SystemUtil.OS.WINDOWS_NT;
+import static com.thoughtworks.gha.notifier.util.SystemUtil.OS.MAC_OS_X;
+import static com.thoughtworks.gha.notifier.util.SystemUtil.OS.OS2;
+import static com.thoughtworks.gha.notifier.util.SystemUtil.OS.UNKNOWN;
+import static com.thoughtworks.gha.notifier.util.SystemUtil.OS.VMS;
+import static com.thoughtworks.gha.notifier.util.SystemUtil.OS.WINDOWS_NT;
 
 public class SystemUtil {
   public static final OS operatingSystem;

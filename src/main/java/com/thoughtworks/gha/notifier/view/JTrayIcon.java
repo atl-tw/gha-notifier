@@ -1,4 +1,6 @@
-package com.thoughtworks.gha.notifier;
+package com.thoughtworks.gha.notifier.view;
+
+import com.thoughtworks.gha.notifier.util.SystemUtil;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
