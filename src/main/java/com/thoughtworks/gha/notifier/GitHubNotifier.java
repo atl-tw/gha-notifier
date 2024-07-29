@@ -2,8 +2,12 @@ package com.thoughtworks.gha.notifier;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import com.jthemedetecor.OsThemeDetector;
 import com.thoughtworks.gha.notifier.controller.ConfigurationController;
 import com.thoughtworks.gha.notifier.service.MonitorService;
+import com.thoughtworks.gha.notifier.util.SystemUtil;
 import com.thoughtworks.gha.notifier.view.ConfigurationWindow;
 import com.thoughtworks.gha.notifier.view.Toaster;
 import com.thoughtworks.gha.notifier.view.Tray;
@@ -49,6 +53,8 @@ public class GitHubNotifier {
     } catch (UnsupportedLookAndFeelException e) {
       Logger.getAnonymousLogger().log(Level.WARNING, "Failed to load LAF", e);
     }
+    final OsThemeDetector detector = OsThemeDetector.getDetector();
+    setTheme(detector.isDark());
     final CountDownLatch latch = new CountDownLatch(1);
     // Initialize JavaFX for toaster.
     SwingUtilities.invokeLater(() -> {
@@ -57,6 +63,20 @@ public class GitHubNotifier {
     });
     latch.await();
     SwingUtilities.invokeLater(GitHubNotifier::new);
+  }
+
+  private static void setTheme(boolean isDark){
+    try {
+      if (isDark) {
+        UIManager.setLookAndFeel(SystemUtil.operatingSystem == SystemUtil.OS.MAC_OS_X ?
+            new FlatMacDarkLaf() : new FlatDarkLaf());
+      } else {
+        UIManager.setLookAndFeel(SystemUtil.operatingSystem == SystemUtil.OS.MAC_OS_X ?
+            new FlatMacLightLaf() : new FlatLightLaf());
+      }
+    } catch (Exception e){
+      Logger.getAnonymousLogger().log(Level.WARNING, "Failed to set theme to " + isDark, e);
+    }
   }
 
 

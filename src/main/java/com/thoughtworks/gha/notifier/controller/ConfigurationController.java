@@ -98,6 +98,7 @@ public class ConfigurationController {
     configurationWindow.getMainForm().setNotify(notify);
     if (selected.size() == 1) {
       configurationWindow.getMainForm().setOnMainBranchChanged(this::onMainBranchChanged);
+      configurationWindow.getMainForm().setMainBranch(selected.get(0).getMainBranch());
     }
     configurationWindow.getMainForm().setOnNotifyChanged(this::onNotifyChecked);
     this.selectedWorkflows = selected;
@@ -114,7 +115,7 @@ public class ConfigurationController {
 
   private void onRepositoriesSelected() {
     var selected = configurationWindow.getMainForm().getSelectedResponsitories();
-    if (selected == null || selected.size() > 1) {
+    if (selected == null || selected.size() != 1) {
       configurationWindow.getMainForm().hideDetailsPane();
       return;
     }

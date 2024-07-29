@@ -304,4 +304,8 @@ public class MainForm extends JPanel {
   public void setNotify(boolean notify) {
     this.notify.setSelected(notify);
   }
+
+  public void setMainBranch(String mainBranch) {
+    this.mainBranch.setText(mainBranch);
+  }
 }
