@@ -40,7 +40,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y jq git libxml2-utils nsis curl zip unzip tar gzip gcc zlib1g-dev
-      - uses: sdkman/sdkman-action@v1
+      - uses: sdkman/sdkman-action@main
         id: sdkman
         with:
           candidate: java
