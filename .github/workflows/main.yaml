@@ -52,19 +52,8 @@ jobs:
           ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
       - name: Build DEB
         run: |
-          JAVA_HOME=/github/home/.sdkman/candidates/java/current ./mvnw --batch-mode  install
-          jpackage \
-          --dest /__w/gha-notifier/gha-notifier/target/jpackage \
-          --type deb \
-          --app-version '1.0.10' \
-          --name 'GitHub Actions Notifier' \
-          --icon /__w/gha-notifier/gha-notifier/src/bundle/icon.png \
-          --input /__w/gha-notifier/gha-notifier/src/bundle \
-          --main-jar '/__w/gha-notifier/gha-notifier/target/gha-notifier-1.0.${{github.run_number}}-shaded.jar' \
-          --main-class com.thoughtworks.gha.notifier.GitHubNotifier \
-          --linux-menu-group 'Developer' \
-          --linux-app-category 'Developer' \
-          --linux-shortcut
+          JAVA_HOME=/github/home/.sdkman/candidates/java/current ./mvnw -Plinux-deb --batch-mode  install
+          ls target
       - name: 'Upload Jar'
         uses: actions/upload-artifact@v4
         with:
