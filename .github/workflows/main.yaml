@@ -40,11 +40,12 @@ jobs:
         run: |
           apt-get update
           apt-get install -y jq git libxml2-utils nsis curl zip unzip tar gzip gcc zlib1g-dev
-      - uses: graalvm/setup-graalvm@v1
+      - uses: sdkman/sdkman-action@v1
+        id: sdkman
         with:
-          java-version: '22'
-          distribution: 'graalvm'
-          github-token: ${{ github.token }}
+          candidate: java
+          version: 22.0.2-amzn
+      - run: java -version
       - run: which java && java -version
       - name: Set Version
         run: |
