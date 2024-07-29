@@ -10,6 +10,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +30,15 @@ public class GH {
   public GH(ObjectMapper mapper, String githubExecutable) {
     this.mapper = mapper;
     this.executable = githubExecutable;
+  }
+
+  public void browse(String path) {
+    try {
+      new ProcessBuilder(executable, "browse")
+          .directory(new File(path)).start();
+    } catch (IOException e) {
+      LOGGER.log(Level.WARNING, "Error browsing", e);
+    }
   }
 
 

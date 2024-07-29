@@ -4,13 +4,15 @@
     <groupId>com.thoughtworks</groupId>
     <artifactId>gha-notifier</artifactId>
     <packaging>jar</packaging>
-    <version>0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <name>gha-notifier</name>
-    <url>http://maven.apache.org</url>
+    <url>https://github.com/atl-tw/gha-notifier</url>
     <properties>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <mainClassName>com.thoughtworks.gha.notifier.GitHubNotifier</mainClassName>
     </properties>
     <dependencies>
         <dependency>
@@ -46,34 +48,9 @@
             <version>11.2.1</version>
         </dependency>
         <dependency>
-            <groupId>com.github.weisj</groupId>
-            <artifactId>darklaf-core</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.weisj</groupId>
-            <artifactId>darklaf-platform-base</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.weisj</groupId>
-            <artifactId>darklaf-platform-decorations</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.weisj</groupId>
-            <artifactId>darklaf-compatibility</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.weisj</groupId>
-            <artifactId>swing-extensions-dsl</artifactId>
-            <version>0.1.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.weisj</groupId>
-            <artifactId>jsvg</artifactId>
-            <version>1.6.0</version>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.5</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -82,42 +59,254 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
     <build>
-        <plugins>
-            <plugin>
-                <groupId>de.perdian.maven.plugins</groupId>
-                <artifactId>macosappbundler-maven-plugin</artifactId>
-                <version>1.20.0</version>
-                <configuration>
-                    <plist>
-                        <CFBundleIconFile>src/bundle/icons.icns</CFBundleIconFile>
-                        <JVMMainClassName>com.thoughtworks.gha.notifier.App</JVMMainClassName>
-                        <CFBundleDisplayName>GitHub Actions Notifier</CFBundleDisplayName>
-                        <CFBundleDevelopmentRegion>English</CFBundleDevelopmentRegion>
-                        <CFBundleURLTypes>
-                            <string>msa</string>
-                        </CFBundleURLTypes>
-                        <JVMVersion>17+</JVMVersion>
-                    </plist>
-                    <dmg>
-                        <generate>true</generate>
-                        <additionalResources>
-                            <additionalResource>
-                                <directory>src/bundle/macos/distribution</directory>
-                            </additionalResource>
-                        </additionalResources>
-                    </dmg>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>bundle</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
+    <plugins>
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.2</version>
+        <configuration>
+            <shadedArtifactAttached>true</shadedArtifactAttached>
+            <transformers>
+                <transformer
+                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                    <mainClass>${mainClassName}</mainClass>
+                </transformer>
+            </transformers>
+        </configuration>
+        <executions>
+            <execution>
+                <phase>package</phase>
+                <goals>
+                    <goal>shade</goal>
+                </goals>
+            </execution>
+        </executions>
+    </plugin>
+    </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>linux-rpm</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.akman</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <version>0.1.5</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <name>GHA Notifier</name>
+                                    <mainjar>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</mainjar>
+                                    <appversion>${project.version}</appversion>
+                                    <icon>${project.basedir}/src/bundle/icon.png</icon>
+                                    <input>${project.basedir}/src/bundle/input</input>
+                                    <type>RPM</type>
+                                    <input>src/bundle</input>
+                                    <linuxappcategory>Developer</linuxappcategory>
+                                    <linuxmenugroup>Developer</linuxmenugroup>
+                                    <linuxshortcut>true</linuxshortcut>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>linux-deb</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.akman</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <version>0.1.5</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <name>GHA Notifier</name>
+                                    <mainjar>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</mainjar>
+                                    <appversion>${project.version}</appversion>
+                                    <icon>${project.basedir}/src/bundle/icon.png</icon>
+                                    <input>${project.basedir}/src/bundle/input</input>
+                                    <type>DEB</type>
+                                    <input>src/bundle</input>
+                                    <linuxappcategory>Developer</linuxappcategory>
+                                    <linuxmenugroup>Developer</linuxmenugroup>
+                                    <linuxshortcut>true</linuxshortcut>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>windows-msi</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.akman</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <version>0.1.5</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <name>GHA Notifier</name>
+                                    <mainjar>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</mainjar>
+                                    <appversion>${project.version}</appversion>
+                                    <icon>${project.basedir}/src/bundle/icon.ico</icon>
+                                    <input>${project.basedir}/src/bundle/input</input>
+                                    <type>MSI</type>
+                                    <winmenu>true</winmenu>
+                                    <winshortcut>true</winshortcut>
+                                    <input>src/bundle</input>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>mac-arm</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.googlecode.maven-download-plugin</groupId>
+                        <artifactId>download-maven-plugin</artifactId>
+                        <version>1.9.0</version>
+                        <executions>
+                            <execution>
+                                <id>download-jre</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <url>https://download.bell-sw.com/java/21.0.4+9/bellsoft-jre21.0.4+9-macos-aarch64.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}/jre-21</outputDirectory>
+                        </configuration>
+                    </plugin>
+                    <!-- We are not using JPackage for Mac OS because this plugin allows us to bundle for any architecture -->
+                    <plugin>
+                        <groupId>de.perdian.maven.plugins</groupId>
+                        <artifactId>macosappbundler-maven-plugin</artifactId>
+                        <version>1.20.1</version>
+                        <configuration>
+                            <nativeBinary>ARM_64</nativeBinary>
+                            <plist>
+                                <CFBundleName>GitHub Actions Notifier</CFBundleName>
+                                <CFBundleIconFile>src/bundle/icon.icns</CFBundleIconFile>
+                                <JVMMainClassName>${mainClassName}</JVMMainClassName>
+                                <CFBundleDisplayName>GitHub Actions Notifier</CFBundleDisplayName>
+                                <CFBundleDevelopmentRegion>English</CFBundleDevelopmentRegion>
+                                <CFBundleURLTypes>
+                                    <string>msa</string>
+                                </CFBundleURLTypes>
+                                <JVMVersion>17+</JVMVersion>
+                                <CFBundleIdentifier>com.thoughtworks.gha.notifier</CFBundleIdentifier>
+
+                            </plist>
+                            <dmg>
+                                <generate>true</generate>
+                                <dmgFileName>gha-notifier-ARM_64</dmgFileName>
+                            </dmg>
+                            <jdk>
+                                <include>true</include>
+                                <location>${project.build.directory}/jre-21/jre-21.0.4.jre</location>
+                            </jdk>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>bundle</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>mac-intel</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.googlecode.maven-download-plugin</groupId>
+                        <artifactId>download-maven-plugin</artifactId>
+                        <version>1.9.0</version>
+                        <executions>
+                            <execution>
+                                <id>download-jre</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <url>https://download.bell-sw.com/java/21.0.4+9/bellsoft-jre21.0.4+9-macos-amd64.zip</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}/jre-21</outputDirectory>
+                        </configuration>
+                    </plugin>
+                    <!-- We are not using JPackage for Mac OS because this plugin allows us to bundle for any architecture -->
+                    <plugin>
+                        <groupId>de.perdian.maven.plugins</groupId>
+                        <artifactId>macosappbundler-maven-plugin</artifactId>
+                        <version>1.20.1</version>
+                        <configuration>
+                            <nativeBinary>X86_64</nativeBinary>
+                            <plist>
+                                <CFBundleName>GitHub Actions Notifier</CFBundleName>
+                                <CFBundleIconFile>src/bundle/icon.icns</CFBundleIconFile>
+                                <JVMMainClassName>${mainClassName}</JVMMainClassName>
+                                <CFBundleDisplayName>GitHub Actions Notifier</CFBundleDisplayName>
+                                <CFBundleDevelopmentRegion>English</CFBundleDevelopmentRegion>
+                                <CFBundleURLTypes>
+                                    <string>msa</string>
+                                </CFBundleURLTypes>
+                                <JVMVersion>17+</JVMVersion>
+                            </plist>
+                            <dmg>
+                                <generate>true</generate>
+                                <dmgFileName>gha-notifier-x86_64</dmgFileName>
+                            </dmg>
+                            <jdk>
+                                <include>true</include>
+                                <location>${project.build.directory}/jre-21/jre-21.0.4.jre</location>
+                            </jdk>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>bundle</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
