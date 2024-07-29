@@ -205,6 +205,7 @@
                             <outputDirectory>${project.build.directory}/jre-21</outputDirectory>
                         </configuration>
                     </plugin>
+                    <!-- We are not using JPackage for Mac OS because this plugin allows us to bundle for any architecture -->
                     <plugin>
                         <groupId>de.perdian.maven.plugins</groupId>
                         <artifactId>macosappbundler-maven-plugin</artifactId>
@@ -212,6 +213,7 @@
                         <configuration>
                             <nativeBinary>ARM_64</nativeBinary>
                             <plist>
+                                <CFBundleName>GitHub Actions Notifier</CFBundleName>
                                 <CFBundleIconFile>src/bundle/icon.icns</CFBundleIconFile>
                                 <JVMMainClassName>${mainClassName}</JVMMainClassName>
                                 <CFBundleDisplayName>GitHub Actions Notifier</CFBundleDisplayName>
@@ -267,6 +269,7 @@
                             <outputDirectory>${project.build.directory}/jre-21</outputDirectory>
                         </configuration>
                     </plugin>
+                    <!-- We are not using JPackage for Mac OS because this plugin allows us to bundle for any architecture -->
                     <plugin>
                         <groupId>de.perdian.maven.plugins</groupId>
                         <artifactId>macosappbundler-maven-plugin</artifactId>
@@ -274,6 +277,7 @@
                         <configuration>
                             <nativeBinary>X86_64</nativeBinary>
                             <plist>
+                                <CFBundleName>GitHub Actions Notifier</CFBundleName>
                                 <CFBundleIconFile>src/bundle/icon.icns</CFBundleIconFile>
                                 <JVMMainClassName>${mainClassName}</JVMMainClassName>
                                 <CFBundleDisplayName>GitHub Actions Notifier</CFBundleDisplayName>
