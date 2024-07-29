@@ -177,7 +177,7 @@ jobs:
         run: |
           ./mvnw --batch-mode install
           mkdir target\jpackage
-          jpackage --dest D:\a\gha-notifier\gha-notifier\target\jpackage --type msi --app-version '1.0.${{github.run_number}}' --name 'GitHub Actions Notifier' --icon D:\a\gha-notifier\gha-notifier\src\bundle\icon.ico --input D:\a\gha-notifier\gha-notifier\src\bundle --main-jar 'target\gha-notifier-1.0.${{github.run_number}}-shaded.jar' --win-menu --win-shortcut
+          jpackage --dest D:\a\gha-notifier\gha-notifier\target\jpackage --type msi --app-version '1.0.${{github.run_number}}' --name 'GitHub Actions Notifier' --icon D:\a\gha-notifier\gha-notifier\src\bundle\icon.ico --input D:\a\gha-notifier\gha-notifier\src\bundle --main-jar 'D:\a\gha-notifier\gha-notifier\target\gha-notifier-1.0.${{github.run_number}}-shaded.jar' --win-menu --win-shortcut
           dir target
           dir target\jpackage
       - name: 'Upload Windows Binary'
