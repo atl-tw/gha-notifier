@@ -51,7 +51,7 @@ jobs:
         run: |
           ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
       - name: Build DEB
-        run: ./mvnw --batch-mode -Plinux-deb install
+        run: JAVA_HOME=/github/home/.sdkman/candidates/java/current ./mvnw --batch-mode -Plinux-deb install
       - name: 'Upload Jar'
         uses: actions/upload-artifact@v4
         with:
