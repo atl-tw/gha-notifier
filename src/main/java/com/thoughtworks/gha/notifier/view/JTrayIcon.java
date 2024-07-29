@@ -52,7 +52,7 @@ public class JTrayIcon extends TrayIcon implements PopupMenuListener, MouseListe
   public void mouseReleased(MouseEvent e) {
     if (SystemUtil.operatingSystem == SystemUtil.OS.MAC_OS_X || e.getButton() == MouseEvent.BUTTON3 && mMenu != null) {
       Dimension size = mMenu.getPreferredSize();
-      mDialog.setLocation(e.getX() - size.width / 3, e.getY() - size.height - 3);
+      mDialog.setLocation(e.getX() - (int) getSize().getWidth(), e.getY() - size.height - 3);
       mDialog.setSize(size);
       mDialog.setVisible(true);
       mMenu.show(mDialog.getContentPane(), 0, 0);
