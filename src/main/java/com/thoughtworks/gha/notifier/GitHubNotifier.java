@@ -268,7 +268,8 @@ public class GitHubNotifier {
             .image(Objects.requireNonNull(GitHubNotifier.class.getResource("/red-circle@24.png")).toString())
             .title(GIT_HUB_NOTIFIER).content("Workflow " + w.getName() + " on " + repository.getPath().substring(repository.getPath().lastIndexOf('/') + 1) + " is failing.")
             .action("Review", () -> configurationService.browse(repository))
-            .timeout(240).toast();
+            .timeout(240)
+            .toast();
       }
     });
   }

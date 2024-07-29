@@ -4,13 +4,15 @@
     <groupId>com.thoughtworks</groupId>
     <artifactId>gha-notifier</artifactId>
     <packaging>jar</packaging>
-    <version>0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <name>gha-notifier</name>
-    <url>http://maven.apache.org</url>
+    <url>https://github.com/atl-tw/gha-notifier</url>
     <properties>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <mainClassName>com.thoughtworks.gha.notifier.GitHubNotifier</mainClassName>
     </properties>
     <dependencies>
         <dependency>
@@ -57,9 +59,129 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
+    <build>
+    <plugins>
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.2</version>
+        <configuration>
+            <shadedArtifactAttached>true</shadedArtifactAttached>
+            <transformers>
+                <transformer
+                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                    <mainClass>${mainClassName}</mainClass>
+                </transformer>
+            </transformers>
+        </configuration>
+        <executions>
+            <execution>
+                <phase>package</phase>
+                <goals>
+                    <goal>shade</goal>
+                </goals>
+            </execution>
+        </executions>
+    </plugin>
+    </plugins>
+    </build>
 
     <profiles>
+        <profile>
+            <id>linux-rpm</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.akman</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <version>0.1.5</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <name>GHA Notifier</name>
+                                    <mainjar>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</mainjar>
+                                    <appversion>${project.version}</appversion>
+                                    <icon>${project.basedir}/src/bundle/icon.png</icon>
+                                    <input>${project.basedir}/src/bundle/input</input>
+                                    <type>RPM</type>
+                                    <input>src/bundle</input>
+                                    <linuxappcategory>Developer</linuxappcategory>
+                                    <linuxmenugroup>Developer</linuxmenugroup>
+                                    <linuxshortcut>true</linuxshortcut>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>linux-deb</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.akman</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <version>0.1.5</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <name>GHA Notifier</name>
+                                    <mainjar>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</mainjar>
+                                    <appversion>${project.version}</appversion>
+                                    <icon>${project.basedir}/src/bundle/icon.png</icon>
+                                    <input>${project.basedir}/src/bundle/input</input>
+                                    <type>DEB</type>
+                                    <input>src/bundle</input>
+                                    <linuxappcategory>Developer</linuxappcategory>
+                                    <linuxmenugroup>Developer</linuxmenugroup>
+                                    <linuxshortcut>true</linuxshortcut>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>windows-msi</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.akman</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <version>0.1.5</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                                <configuration>
+                                    <name>GHA Notifier</name>
+                                    <mainjar>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</mainjar>
+                                    <appversion>${project.version}</appversion>
+                                    <icon>${project.basedir}/src/bundle/icon.ico</icon>
+                                    <input>${project.basedir}/src/bundle/input</input>
+                                    <type>MSI</type>
+                                    <winmenu>true</winmenu>
+                                    <winshortcut>true</winshortcut>
+                                    <input>src/bundle</input>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>mac-arm</id>
             <build>
@@ -90,14 +212,16 @@
                         <configuration>
                             <nativeBinary>ARM_64</nativeBinary>
                             <plist>
-                                <CFBundleIconFile>src/bundle/icons.icns</CFBundleIconFile>
-                                <JVMMainClassName>com.thoughtworks.gha.notifier.GitHubNotifier</JVMMainClassName>
+                                <CFBundleIconFile>src/bundle/icon.icns</CFBundleIconFile>
+                                <JVMMainClassName>${mainClassName}</JVMMainClassName>
                                 <CFBundleDisplayName>GitHub Actions Notifier</CFBundleDisplayName>
                                 <CFBundleDevelopmentRegion>English</CFBundleDevelopmentRegion>
                                 <CFBundleURLTypes>
                                     <string>msa</string>
                                 </CFBundleURLTypes>
                                 <JVMVersion>17+</JVMVersion>
+                                <CFBundleIdentifier>com.thoughtworks.gha.notifier</CFBundleIdentifier>
+
                             </plist>
                             <dmg>
                                 <generate>true</generate>
@@ -105,7 +229,7 @@
                             </dmg>
                             <jdk>
                                 <include>true</include>
-                                <location>${project.build.directory}/jre-21</location>
+                                <location>${project.build.directory}/jre-21/jre-21.0.4.jre</location>
                             </jdk>
                         </configuration>
                         <executions>
@@ -150,8 +274,8 @@
                         <configuration>
                             <nativeBinary>X86_64</nativeBinary>
                             <plist>
-                                <CFBundleIconFile>src/bundle/icons.icns</CFBundleIconFile>
-                                <JVMMainClassName>com.thoughtworks.gha.notifier.GitHubNotifier</JVMMainClassName>
+                                <CFBundleIconFile>src/bundle/icon.icns</CFBundleIconFile>
+                                <JVMMainClassName>${mainClassName}</JVMMainClassName>
                                 <CFBundleDisplayName>GitHub Actions Notifier</CFBundleDisplayName>
                                 <CFBundleDevelopmentRegion>English</CFBundleDevelopmentRegion>
                                 <CFBundleURLTypes>
@@ -165,7 +289,7 @@
                             </dmg>
                             <jdk>
                                 <include>true</include>
-                                <location>${project.build.directory}/jre-21</location>
+                                <location>${project.build.directory}/jre-21/jre-21.0.4.jre</location>
                             </jdk>
                         </configuration>
                         <executions>
