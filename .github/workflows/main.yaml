@@ -46,7 +46,7 @@ jobs:
           candidate: java
           version: 21.0.2-open
       - run: java -version
-      - run: which java && java -version
+      - run: which java && java -version && echo $JAVA_HOME
       - name: Set Version
         run: |
           ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
