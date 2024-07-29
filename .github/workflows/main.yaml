@@ -98,25 +98,13 @@ jobs:
           ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
       - name: Build RPM
         run: |
-          JAVA_HOME=/github/home/.sdkman/candidates/java/current ./mvnw  --batch-mode  install
-          jpackage \
-            --dest /__w/gha-notifier/gha-notifier/target/jpackage \
-            --type rpm \
-            --app-version '1.0.${{github.run_number}}' \
-            --name 'GitHub Actions Notifier' \
-            --icon /__w/gha-notifier/gha-notifier/src/bundle/icon.png \
-            --input /__w/gha-notifier/gha-notifier/src/bundle \
-            --main-jar '/__w/gha-notifier/gha-notifier/target/gha-notifier-1.0.${{github.run_number}}-shaded.jar' \
-            --main-class com.thoughtworks.gha.notifier.GitHubNotifier \
-            --linux-menu-group 'Developer' \
-            --linux-app-category 'Developer' \
-            --linux-shortcut
+          JAVA_HOME=/github/home/.sdkman/candidates/java/current ./mvnw  --batch-mode -Plinux-rpm install
           ls target/jpackage
       - name: 'Upload RPM'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}_${{ needs.project-info.outputs.PROJECT_VERSION }}.rpm
-          path: ./target/jpackage/github-actions-notifier_${{ needs.project-info.outputs.PROJECT_VERSION }}.rpm
+          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}_${{ needs.project-info.outputs.PROJECT_VERSION }}_x86_64.rpm
+          path: ./target/jpackage/github-actions-notifier-${{ needs.project-info.outputs.PROJECT_VERSION }}-1.x86_64.rpm
           retention-days: 1
           if-no-files-found: error
   mac-arm:
@@ -169,5 +157,29 @@ jobs:
           path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-x86_64_${{ needs.project-info.outputs.PROJECT_VERSION }}.dmg
           retention-days: 1
           if-no-files-found: error
-
+  windows-build:
+    needs: project-info
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '22'
+          distribution: 'graalvm'
+          github-token: ${{ github.token }}
+      - run: java -version
+      - name: Set Version
+        run: |
+          ./mvnw -U --batch-mode versions:set dependency:tree "-DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}"
+      - name: Build
+        run: ./mvnw --batch-mode -Pwindows-msi  clean install && ls target
+      - name: 'Upload Windows Binary'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}-Windows-amd64.exe
+          path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}-Windows-amd64.exe
+          retention-days: 1
+          if-no-files-found: error
 
