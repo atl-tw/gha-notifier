@@ -37,6 +37,7 @@ public class GitHubNotifier {
   public static void main(String[] args) throws InterruptedException {
     // Don't show in dock
     System.setProperty("apple.awt.UIElement", "true");
+    System.setProperty("apple.awt.application.appearance", "system");
     try (var configFile = GitHubNotifier.class.getResourceAsStream("/logging.properties")) {
       LogManager.getLogManager().readConfiguration(configFile);
     } catch (IOException e) {
