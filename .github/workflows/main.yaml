@@ -53,7 +53,7 @@ jobs:
       - name: Build DEB
         run: |
           JAVA_HOME=/github/home/.sdkman/candidates/java/current ./mvnw -Plinux-deb --batch-mode  install
-          ls target
+          ls target/jpackage
       - name: 'Upload Jar'
         uses: actions/upload-artifact@v4
         with:
@@ -79,6 +79,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.deb
-          path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.deb
+          path: ./target/jpackage/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.deb
           retention-days: 1
           if-no-files-found: error
