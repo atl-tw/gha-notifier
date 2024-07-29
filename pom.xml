@@ -88,8 +88,9 @@
             <plugin>
                 <groupId>de.perdian.maven.plugins</groupId>
                 <artifactId>macosappbundler-maven-plugin</artifactId>
-                <version>1.20.0</version>
+                <version>1.20.1</version>
                 <configuration>
+                    <nativeBinary>ARM_64</nativeBinary>
                     <plist>
                         <CFBundleIconFile>src/bundle/icons.icns</CFBundleIconFile>
                         <JVMMainClassName>com.thoughtworks.gha.notifier.App</JVMMainClassName>
@@ -102,12 +103,11 @@
                     </plist>
                     <dmg>
                         <generate>true</generate>
-                        <additionalResources>
-                            <additionalResource>
-                                <directory>src/bundle/macos/distribution</directory>
-                            </additionalResource>
-                        </additionalResources>
+                        <dmgFileName>gha-notifier.dmg</dmgFileName>
                     </dmg>
+                    <jdk>
+                        <include>true</include>
+                    </jdk>
                 </configuration>
                 <executions>
                     <execution>
