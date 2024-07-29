@@ -50,12 +50,8 @@ jobs:
       - name: Set Version
         run: |
           ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
-      - name: Build RPM
-        run: ./mvnw --batch-mode  install
-      - name: JP
-        run: jpackage  --dest /__w/gha-notifier/gha-notifier/target/jpackage  --type deb --app-version '1.0.2' --name 'GitHub Actions Notifier' --icon /__w/gha-notifier/gha-notifier/src/bundle/icon.png  --input /__w/gha-notifier/gha-notifier/src/bundle  --main-jar '/__w/gha-notifier/gha-notifier/target/gha-notifier-1.0.2-shaded.jar'  --main-class com.thoughtworks.gha.notifier.GitHubNotifier  --linux-menu-group 'Developer'  --linux-app-category 'Developer'  --linux-shortcut
-      - name: Build RPM
-        run: ./mvnw --batch-mode -Plinux-rpm install
+      - name: Build DEB
+        run: ./mvnw --batch-mode -Plinux-deb install
       - name: 'Upload Jar'
         uses: actions/upload-artifact@v4
         with:
@@ -70,13 +66,13 @@ jobs:
           path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}-shaded.jar
           retention-days: 1
           if-no-files-found: error
-      - name: 'Upload RPM'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.rpm
-          path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.rpm
-          retention-days: 1
-          if-no-files-found: error
+#      - name: 'Upload RPM'
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.rpm
+#          path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.rpm
+#          retention-days: 1
+#          if-no-files-found: error
       - name: 'Upload DEB'
         uses: actions/upload-artifact@v4
         with:
