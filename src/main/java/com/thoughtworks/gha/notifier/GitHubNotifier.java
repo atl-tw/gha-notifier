@@ -3,6 +3,7 @@ package com.thoughtworks.gha.notifier;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.sshtools.twoslices.Toast;
+import com.sshtools.twoslices.ToastActionListener;
 import com.sshtools.twoslices.ToastType;
 import com.thoughtworks.gha.notifier.gh.GitHubException;
 import com.thoughtworks.gha.notifier.model.Configuration;
@@ -33,9 +34,9 @@ import java.util.logging.Logger;
 
 import static java.util.Optional.ofNullable;
 
-/**
- * Hello world!
- */
+
+
+
 public class GitHubNotifier {
 
   public static final String GIT_HUB_NOTIFIER = "GitHub Actions Notifier";
@@ -152,8 +153,7 @@ public class GitHubNotifier {
     if (option == JFileChooser.APPROVE_OPTION) {
       File selectedDirectory = fileChooser.getSelectedFile();
       if (!ofNullable(selectedDirectory.list((dir, name) -> ".git".equals(name))).map(files -> files.length > 0).orElse(false)) {
-        JOptionPane.showMessageDialog(frame,
-            "Selected directory is not a git repository: " + selectedDirectory.getAbsolutePath());
+        JOptionPane.showMessageDialog(frame, "Selected directory is not a git repository: " + selectedDirectory.getAbsolutePath());
         return;
       }
       try {
@@ -229,18 +229,16 @@ public class GitHubNotifier {
     }
     var repository = (Repository) selected.get(0);
     mainForm.getDetailsPanel().setVisible(true);
-    mainForm.getRepositoryPath().setText("Workflows: " +
-        repository.getPath().substring(repository.getPath().lastIndexOf('/') + 1));
+    mainForm.getRepositoryPath().setText("Workflows: " + repository.getPath().substring(repository.getPath().lastIndexOf('/') + 1));
     mainForm.getWorkflows().setListData(repository.getWorkflows().toArray(new Workflow[0]));
     mainForm.getWorkflowConfig().setVisible(false);
   }
 
   private void onRepositoriesChange(PropertyChangeEvent e) {
-    SwingUtilities.invokeLater(
-        () -> {
-          mainForm.getRepositories().setListData(configurationService.getRepositories().toArray(new Repository[0]));
-          mainForm.getWorkflowConfig().setVisible(false);
-        });
+    SwingUtilities.invokeLater(() -> {
+      mainForm.getRepositories().setListData(configurationService.getRepositories().toArray(new Repository[0]));
+      mainForm.getWorkflowConfig().setVisible(false);
+    });
   }
 
   private void notifyOnStateChange(PropertyChangeEvent e) {
@@ -249,11 +247,7 @@ public class GitHubNotifier {
       var state = configurationService.lastState(w);
       var repository = configurationService.findRepository(w);
       if (state == Configuration.State.SUCCESS) {
-        @SuppressWarnings("resource") var success =
-            Toast.toast(ToastType.INFO, Objects.requireNonNull(GitHubNotifier.class.getResource(BUILD_PNG)).toString(),
-                GIT_HUB_NOTIFIER,
-                "Workflow " + w.getName() + " on " +
-                    repository.getPath().substring(repository.getPath().lastIndexOf('/') + 1) + " is now successful.");
+        @SuppressWarnings("resource") var success = Toast.toast(ToastType.INFO, Objects.requireNonNull(GitHubNotifier.class.getResource("/green-check@24.png")).toString(), GIT_HUB_NOTIFIER, "Workflow " + w.getName() + " on " + repository.getPath().substring(repository.getPath().lastIndexOf('/') + 1) + " is now successful.");
         timer.schedule(new TimerTask() {
           @Override
           public void run() {
@@ -269,13 +263,15 @@ public class GitHubNotifier {
         }, 3000);
       } else {
         //noinspection resource
-        Toast.toast(ToastType.ERROR, GitHubNotifier.class.getResource(BUILD_PNG).toString(), GIT_HUB_NOTIFIER,
-            "Workflow " + w.getName() + " on " + repository.getPath().substring(repository.getPath().lastIndexOf('/') + 1) + " is failing.");
+        Toast.builder()
+            .type(ToastType.ERROR)
+            .image(Objects.requireNonNull(GitHubNotifier.class.getResource("/red-circle@24.png")).toString())
+            .title(GIT_HUB_NOTIFIER).content("Workflow " + w.getName() + " on " + repository.getPath().substring(repository.getPath().lastIndexOf('/') + 1) + " is failing.")
+            .action("Review", () -> configurationService.browse(repository))
+            .timeout(240).toast();
       }
     });
   }
-
-
   private void showWindow() {
     frame.setVisible(true);
     frame.setExtendedState(JFrame.NORMAL);

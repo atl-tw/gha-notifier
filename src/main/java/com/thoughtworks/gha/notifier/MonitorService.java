@@ -10,6 +10,7 @@ import lombok.SneakyThrows;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Timer;
@@ -34,6 +35,8 @@ public class MonitorService {
       configuration = mapper.readValue(configFile, Configuration.class);
     }
     gh = new GH(mapper, configuration.getGithubExecutable());
+    new HashSet<>(configuration.getLastStates().keySet())
+        .forEach(k-> configuration.getLastStates().put(k,Configuration.State.SUCCESS));
     timer.schedule(new TimerTask() {
       @Override
       public void run() {
@@ -127,5 +130,9 @@ public class MonitorService {
 
   public boolean checkGitHub() {
     return gh.checkGitHub();
+  }
+
+  public void browse(Repository repository) {
+    gh.browse(repository.getPath());
   }
 }
