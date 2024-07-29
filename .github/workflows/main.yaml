@@ -175,7 +175,7 @@ jobs:
           ./mvnw -U --batch-mode versions:set dependency:tree "-DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}"
       - name: Build
         run: |
-          ./mvnw --batch-mode -Pwindows-mse clean install && ls target\jpackage
+          ./mvnw --batch-mode -Pwindows-msi clean install && ls target\jpackage
 #          jpackage --dest D:\a\gha-notifier\gha-notifier\target\jpackage --type msi  --app-version '1.0.${{github.run_number}}'  --name 'GHitHub Actions Notifier'           --icon D:\a\gha-notifier\gha-notifier\src\bundle\icon.ico           --input D:\a\gha-notifier\gha-notifier\src\bundle          --main-jar 'D:\a\gha-notifier\gha-notifier\target\gha-notifier-1.0.${{github.run_number}}-shaded.jar'        --win-menu           --win-shortcut
       - name: 'Upload Windows Binary'
         uses: actions/upload-artifact@v4
