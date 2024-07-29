@@ -179,7 +179,7 @@
                                     <goal>jpackage</goal>
                                 </goals>
                                 <configuration>
-                                    <name>GHA Notifier</name>
+                                    <name>GitHub Actions Notifier</name>
                                     <mainjar>${project.build.directory}\${project.artifactId}-${project.version}-shaded.jar</mainjar>
                                     <appversion>${project.version}</appversion>
                                     <icon>${project.basedir}\src\bundle\icon.ico</icon>
