@@ -4,31 +4,103 @@
 
 package com.thoughtworks.gha.notifier.view;
 
-import java.awt.*;
-
 import com.thoughtworks.gha.notifier.GitHubNotifier;
-import lombok.Getter;
+import com.thoughtworks.gha.notifier.model.Repository;
+import com.thoughtworks.gha.notifier.model.Workflow;
+import lombok.Setter;
 
 import javax.swing.*;
-import javax.swing.GroupLayout;
+import java.awt.*;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author thw8305
  */
-@Getter
 public class MainForm extends JPanel {
-    public MainForm() {
-        initComponents();
-        var addImage = Toolkit.getDefaultToolkit().getImage(GitHubNotifier.class.getResource("/add.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
-        var removeImage = Toolkit.getDefaultToolkit().getImage(GitHubNotifier.class.getResource("/remove.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
-        var ghImage = Toolkit.getDefaultToolkit().getImage(GitHubNotifier.class.getResource("/github.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
-        this.getAdd().setIcon(new ImageIcon(addImage));
-        this.getRemove().setIcon(new ImageIcon(removeImage));
-        this.getGh().setIcon(new ImageIcon(ghImage));
-    }
+  @Setter
+  private transient Runnable onAddRepository;
+  @Setter
+  private transient Runnable onRemoveRepositories;
+  @Setter
+  private transient Runnable onGitHubSelect;
+  @Setter
+  private transient Runnable onNotifyChanged;
+  @Setter
+  private transient Consumer<String> onMainBranchChanged;
+  @Setter
+  private transient Runnable onRepositoriesSelected;
+  @Setter
+  private transient Runnable onWorkflowSelected;
 
-    private void initComponents() {
-        // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
+  // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
+    // Generated using JFormDesigner non-commercial license
+    private JPanel panel1;
+    private JToolBar toolBar1;
+    private JButton add;
+    private JButton remove;
+    private JButton gh;
+    private JScrollPane scrollPane1;
+    private JList<Repository> repositories;
+    private JPanel detailsPanel;
+    private JLabel repositoryPath;
+    private JScrollPane scrollPane2;
+    private JList<Workflow> workflows;
+    private JPanel workflowConfig;
+    private JCheckBox notify;
+    private JTextField mainBranch;
+    private JLabel label1;
+  // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
+
+  public MainForm() {
+    initComponents();
+    var addImage = Toolkit.getDefaultToolkit().getImage(GitHubNotifier.class.getResource("/add.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+    var removeImage = Toolkit.getDefaultToolkit().getImage(GitHubNotifier.class.getResource("/remove.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+    var ghImage = Toolkit.getDefaultToolkit().getImage(GitHubNotifier.class.getResource("/github.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
+    this.add.setIcon(new ImageIcon(addImage));
+    this.remove.setIcon(new ImageIcon(removeImage));
+    this.gh.setIcon(new ImageIcon(ghImage));
+    this.add.addActionListener(e -> {
+      if(onAddRepository != null)
+        onAddRepository.run();
+    });
+    this.remove.addActionListener(e -> {
+      if(onRemoveRepositories != null)
+        onRemoveRepositories.run();
+    });
+    this.gh.addActionListener(e ->{
+      if(onGitHubSelect != null) onGitHubSelect.run();
+    });
+    this.notify.addActionListener(e -> {
+      if (onNotifyChanged != null) onNotifyChanged.run();
+    });
+    this.mainBranch.addActionListener(e -> {
+      if (onMainBranchChanged != null) onMainBranchChanged.accept(mainBranch.getText());
+    });
+    this.repositories.addListSelectionListener(e -> {
+      if (e.getValueIsAdjusting()) {
+        return;
+      }
+      if (onRepositoriesSelected != null) onRepositoriesSelected.run();
+    });
+    this.workflows.addListSelectionListener(e -> {
+      if (e.getValueIsAdjusting()) {
+        return;
+      }
+      if (onWorkflowSelected != null) onWorkflowSelected.run();
+    });
+  }
+
+  public boolean isNotifyChecked(){
+    return this.notify.isSelected();
+  }
+
+  public void setRepositories(List<Repository> repositories){
+    SwingUtilities.invokeLater(() -> this.repositories.setListData(repositories.toArray(new Repository[0])));
+  }
+
+  private void initComponents() {
+    // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         // Generated using JFormDesigner non-commercial license
         panel1 = new JPanel();
         toolBar1 = new JToolBar();
@@ -194,24 +266,42 @@ public class MainForm extends JPanel {
                     .addContainerGap())
         );
         // JFormDesigner - End of component initialization  //GEN-END:initComponents  @formatter:on
-    }
+  }
 
-    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
-    // Generated using JFormDesigner non-commercial license
-    private JPanel panel1;
-    private JToolBar toolBar1;
-    private JButton add;
-    private JButton remove;
-    private JButton gh;
-    private JScrollPane scrollPane1;
-    private JList<com.thoughtworks.gha.notifier.model.Repository> repositories;
-    private JPanel detailsPanel;
-    private JLabel repositoryPath;
-    private JScrollPane scrollPane2;
-    private JList<com.thoughtworks.gha.notifier.model.Workflow> workflows;
-    private JPanel workflowConfig;
-    private JCheckBox notify;
-    private JTextField mainBranch;
-    private JLabel label1;
-    // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
+
+  public void showDetailsPane() {
+    detailsPanel.setVisible(true);
+  }
+
+  public void hideDetailsPane() {
+    detailsPanel.setVisible(false);
+  }
+
+  public void setTitle(String s) {
+    repositoryPath.setText(s);
+  }
+
+  public void hideWorkflowConfig() {
+    workflowConfig.setVisible(false);
+  }
+
+  public List<Repository> getSelectedResponsitories() {
+    return repositories.getSelectedValuesList();
+  }
+
+  public void setWorkflows(List<Workflow> workflows) {
+    SwingUtilities.invokeLater(() -> this.workflows.setListData(workflows.toArray(new Workflow[0])));
+  }
+
+  public void showWorkflowConfig() {
+    workflowConfig.setVisible(true);
+  }
+
+  public java.util.List<Workflow> getSelectedWorkflows() {
+    return workflows.getSelectedValuesList();
+  }
+
+  public void setNotify(boolean notify) {
+    this.notify.setSelected(notify);
+  }
 }

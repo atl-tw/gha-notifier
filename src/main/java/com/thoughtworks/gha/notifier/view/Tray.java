@@ -20,7 +20,7 @@ public class Tray {
   @Setter
   private Runnable showWindow;
 
-  public Tray(){
+  public Tray() {
     if (SystemTray.isSupported()) {
       SystemTray tray = SystemTray.getSystemTray();
       Image image = Toolkit.getDefaultToolkit().getImage(GitHubNotifier.class.getResource(BUILD_PNG));
@@ -52,12 +52,16 @@ public class Tray {
 
 
   public void setFailures(boolean anyFailures) {
-    trayIcon.setImage( anyFailures ? failureImage: successImage);
-    trayIcon.setToolTip( anyFailures ? "There are failing workflows": "All workflows are successful");
+    SwingUtilities.invokeLater(() -> {
+      trayIcon.setImage(anyFailures ? failureImage : successImage);
+      trayIcon.setToolTip(anyFailures ? "There are failing workflows" : "All workflows are successful");
+    });
   }
 
   public void refreshing() {
-    trayIcon.setToolTip("Checking workflows");
-    trayIcon.setImage(refeshImage);
+    SwingUtilities.invokeLater(() -> {
+      trayIcon.setToolTip("Checking workflows");
+      trayIcon.setImage(refeshImage);
+    });
   }
 }

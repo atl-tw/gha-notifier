@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -37,12 +38,7 @@ public class MonitorService {
     gh = new GH(mapper, configuration.getGithubExecutable());
     new HashSet<>(configuration.getLastStates().keySet())
         .forEach(k-> configuration.getLastStates().put(k,Configuration.State.SUCCESS));
-    timer.schedule(new TimerTask() {
-      @Override
-      public void run() {
-        queryStates();
-      }
-    }, 3000, 60000);
+    timer.schedule(new Task(), 3000);
   }
 
   @SneakyThrows
@@ -64,6 +60,11 @@ public class MonitorService {
   public void removeRepositories(List<Repository> repositories) {
     configuration.getRepositories().removeAll(repositories);
     saveConfig();
+    repositories.stream().map(Repository::getWorkflows).flatMap(List::stream).map(Workflow::getId).forEach(id-> {
+      configuration.getLastStates().remove(id);
+      configuration.getWorkflowsToNotify().remove(id);
+    });
+
     pcs.firePropertyChange("repositories", null, getRepositories());
   }
 
@@ -139,5 +140,17 @@ public class MonitorService {
 
   public boolean anyFailures() {
     return this.configuration.getLastStates().values().stream().anyMatch(s->s == Configuration.State.FAILURE);
+  }
+
+  class Task extends TimerTask {
+    @Override
+    public void run() {
+      try {
+        queryStates();
+      } catch (Exception e){
+        LOGGER.log(Level.SEVERE,"Error querying states", e);
+      }
+      timer.schedule(new Task(), 60000);
+    }
   }
 }
