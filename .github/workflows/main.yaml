@@ -1,0 +1,83 @@
+name: Package and deploy versions
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  project-info:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:latest
+    outputs:
+      PROJECT_ARTIFACT: ${{ steps.project-info.outputs.PROJECT_ARTIFACT }}
+      PROJECT_VERSION: ${{ steps.project-info.outputs.PROJECT_VERSION }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Install tools
+        run: |
+          apt-get update
+          apt-get install -y jq libxml2-utils
+      - name: Store Project Information
+        id: project-info
+        run: |
+          PROJECT_VERSION=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' pom.xml | sed 's/-SNAPSHOT/.${{github.run_number}}'/)
+          echo "PROJECT_VERSION=${PROJECT_VERSION}" 
+          echo "PROJECT_VERSION=${PROJECT_VERSION}" >> $GITHUB_OUTPUT
+          PROJECT_ARTIFACT=$(xmllint --xpath '/*[local-name()="project"]/*[local-name()="artifactId"]/text()' pom.xml)
+          echo "PROJECT_ARTIFACT=${PROJECT_ARTIFACT}"
+          echo "PROJECT_ARTIFACT=${PROJECT_ARTIFACT}" >> $GITHUB_OUTPUT
+  linux-build:
+    needs: project-info
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Install tools
+        run: |
+          apt-get update
+          apt-get install -y jq git libxml2-utils nsis curl zip unzip tar gzip gcc zlib1g-dev
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '22'
+          distribution: 'graalvm'
+          github-token: ${{ github.token }}
+      - run: which java && java -version
+      - name: Set Version
+        run: |
+          ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
+      - name: Build RPM
+        run: ./mvnw --batch-mode -Plinux-rpm clean install
+      - name: Build RPM
+        run: ./mvnw --batch-mode -Plinux-rpm install
+      - name: 'Upload Jar'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.jar
+          path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.jar
+          retention-days: 1
+          if-no-files-found: error
+      - name: 'Upload Shaded'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}-shaded.jar
+          path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}-shaded.jar
+          retention-days: 1
+          if-no-files-found: error
+      - name: 'Upload RPM'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.rpm
+          path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.rpm
+          retention-days: 1
+          if-no-files-found: error
+      - name: 'Upload DEB'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.deb
+          path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}.deb
+          retention-days: 1
+          if-no-files-found: error

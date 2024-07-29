@@ -4,7 +4,7 @@
     <groupId>com.thoughtworks</groupId>
     <artifactId>gha-notifier</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.1</version>
+    <version>1.0-SNAPSHOT</version>
     <name>gha-notifier</name>
     <url>https://github.com/atl-tw/gha-notifier</url>
     <properties>
