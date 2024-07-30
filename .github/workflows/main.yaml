@@ -257,7 +257,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-x86_64_${{ needs.project-info.outputs.PROJECT_VERSION }}.dmg
-          asset_name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-ARM_64_${{ needs.project-info.outputs.PROJECT_VERSION }}.dmg
+          asset_name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-x86_64_${{ needs.project-info.outputs.PROJECT_VERSION }}.dmg
           asset_content_type: application/octet-stream
       - name: Upload Mac Intel
         uses: actions/upload-release-asset@v1
