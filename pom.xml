@@ -277,9 +277,9 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <url>https://download.bell-sw.com/java/21.0.4+9/bellsoft-jre21.0.4+9-macos-amd64.zip</url>
+                            <url>https://download.bell-sw.com/java/17.0.12+10/bellsoft-jre17.0.12+10-macos-amd64.zip</url>
                             <unpack>true</unpack>
-                            <outputDirectory>${project.build.directory}/jre-21</outputDirectory>
+                            <outputDirectory>${project.build.directory}/jre-17</outputDirectory>
                         </configuration>
                     </plugin>
                     <!-- We are not using JPackage for Mac OS because this plugin allows us to bundle for any architecture -->
@@ -306,7 +306,7 @@
                             </dmg>
                             <jdk>
                                 <include>true</include>
-                                <location>${project.build.directory}/jre-21/jre-21.0.4.jre</location>
+                                <location>${project.build.directory}/jre-17/jre-17.0.12.jre</location>
                             </jdk>
                         </configuration>
                         <executions>

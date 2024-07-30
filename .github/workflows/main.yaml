@@ -120,7 +120,7 @@ jobs:
           github-token: ${{ github.token }}
       - run: java -version
         name: Java Info
-      - run: java -version && echo $JAVA_HOME
+      - run: java -version && echo $JAVA_HOME && uname -a
       - name: Set Version
         run: |
           ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
@@ -144,7 +144,7 @@ jobs:
           java-version: '22'
           distribution: 'graalvm'
           github-token: ${{ github.token }}
-      - run: java -version
+      - run: java -version &&  && uname -a
       - name: Set Version
         run: |
           ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
