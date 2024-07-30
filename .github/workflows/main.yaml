@@ -238,8 +238,8 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}_${{ needs.project-info.outputs.PROJECT_VERSION }}_amd64.deb
-          asset_name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}_${{ needs.project-info.outputs.PROJECT_VERSION }}_amd64.deb
+          asset_path: ./target/github-actions-notifier_${{ needs.project-info.outputs.PROJECT_VERSION }}_amd64.deb
+          asset_name: github-actions-notifier_${{ needs.project-info.outputs.PROJECT_VERSION }}_amd64.deb
           asset_content_type: application/vnd.debian.binary-package
       - name: Upload RPM
         uses: actions/upload-release-asset@v1
@@ -247,8 +247,8 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}_${{ needs.project-info.outputs.PROJECT_VERSION }}_x86_64.rpm
-          asset_name:  ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}_${{ needs.project-info.outputs.PROJECT_VERSION }}_x86_64.rpm
+          asset_path: ./target/github-actions-notifier-${{ needs.project-info.outputs.PROJECT_VERSION }}-1.x86_64.rpm
+          asset_name: github-actions-notifier-${{ needs.project-info.outputs.PROJECT_VERSION }}-1.x86_64.rpm
           asset_content_type: application/x-rpm
       - name: Upload Mac ARM
         uses: actions/upload-release-asset@v1
@@ -256,8 +256,8 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}-ARM_64.dmg
-          asset_name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}-ARM_64.dmg
+          asset_path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-x86_64_${{ needs.project-info.outputs.PROJECT_VERSION }}.dmg
+          asset_name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-ARM_64_${{ needs.project-info.outputs.PROJECT_VERSION }}.dmg
           asset_content_type: application/octet-stream
       - name: Upload Mac Intel
         uses: actions/upload-release-asset@v1
@@ -265,6 +265,15 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}-x86_64.dmg
-          asset_name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-${{ needs.project-info.outputs.PROJECT_VERSION }}-x86_64.dmg
+          asset_path: ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-x86_64_${{ needs.project-info.outputs.PROJECT_VERSION }}.dmg
+          asset_name: ${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-x86_64_${{ needs.project-info.outputs.PROJECT_VERSION }}.dmg
+          asset_content_type: application/octet-stream
+      - name: Windows
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./target/GitHub Actions Notifier-${{ needs.project-info.outputs.PROJECT_VERSION }}.msi
+          asset_name: GitHub Actions Notifier-${{ needs.project-info.outputs.PROJECT_VERSION }}.msi
           asset_content_type: application/octet-stream
