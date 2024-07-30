@@ -201,6 +201,8 @@ jobs:
         with:
           path: target
           merge-multiple: true
+      - name: List
+        run: ls -al target
       - name: release
         uses: actions/create-release@v1
         id: create_release
