@@ -135,7 +135,7 @@ jobs:
           if-no-files-found: error
   mac-intel:
     needs: project-info
-    runs-on: macos-latest
+    runs-on: macos-12
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
