@@ -113,11 +113,12 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-      - uses: sdkman/sdkman-action@main
-        id: sdkman
+      - uses: graalvm/setup-graalvm@v1
         with:
-          candidate: java
-          version: 21.0.2-open
+          java-version: '22'
+          distribution: 'graalvm'
+          github-token: ${{ github.token }}
+      - run: java -version
         name: Java Info
       - run: java -version && echo $JAVA_HOME
       - name: Set Version
@@ -138,13 +139,12 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-      - uses: sdkman/sdkman-action@main
-        id: sdkman
+      - uses: graalvm/setup-graalvm@v1
         with:
-          candidate: java
-          version: 21.0.2-open
-        name: Java Info
-      - run: java -version && echo $JAVA_HOME
+          java-version: '22'
+          distribution: 'graalvm'
+          github-token: ${{ github.token }}
+      - run: java -version
       - name: Set Version
         run: |
           ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
