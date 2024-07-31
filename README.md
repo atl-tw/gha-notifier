@@ -1,6 +1,8 @@
 GHA Notifier
 ============
 
+[![Package and deploy versions](https://github.com/atl-tw/gha-notifier/actions/workflows/main.yaml/badge.svg)](https://github.com/atl-tw/gha-notifier/actions/workflows/main.yaml)
+
 Purpose
 -------
 
@@ -8,6 +10,19 @@ If you work in a large enterprise, there is a good chance the IT department has 
 with your GitHub account, but you still want to receive notifications when a GitHub Action fails. 
 
 This application is a system tray notifier that delegates to the GitHub CLI to poll the state of your GitHub Actions.
+
+Installation
+------------
+
+With homebrew Mac:
+
+```bash
+brew tap atl-tw/tap
+brew install --cask gha-notifier
+# enter password to authorize unsigned application
+```
+
+For others, see the releases page for binaries.
 
 Usage
 -----
