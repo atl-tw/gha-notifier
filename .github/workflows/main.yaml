@@ -305,7 +305,7 @@ jobs:
                   "-Dbrew.arm.asset.hash=$ARM_SHA" \
                   "-Dbrew.x86.asset.url=${{ steps.mac-arm.outputs.browser_download_url}}" \
                   "-Dbrew.x86.asset.hash=$ARM_SHA" \
-                   --batch-mode package
+                   --batch-mode  versions:set "-DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}" package
       - name: Publish Homebrew
         env:
           DESTINATION_BRANCH: main
