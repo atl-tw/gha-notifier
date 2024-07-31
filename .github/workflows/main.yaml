@@ -292,7 +292,7 @@ jobs:
       - name: Install tools
         run: |
           apt-get update
-          apt-get install -y wget
+          apt-get install -y wget git
       - name: Build Homebrew Formula
         run: |
           wget https://github.com/atl-tw/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}/archive/refs/tags/${{ needs.project-info.outputs.PROJECT_VERSION }}.zip
