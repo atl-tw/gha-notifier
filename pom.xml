@@ -15,7 +15,7 @@
         <junit.version>5.10.2</junit.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClassName>com.thoughtworks.gha.notifier.GitHubNotifier</mainClassName>
-        <brew.formula.name>${project.artifactId}</brew.formula.name>
+        <brew.formula.name>GhaNotifier</brew.formula.name>
     </properties>
     <repositories>
         <repository>
