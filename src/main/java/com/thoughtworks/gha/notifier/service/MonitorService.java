@@ -41,11 +41,18 @@ public class MonitorService {
     gh = new GH(mapper, configuration.getGithubExecutable());
     new HashSet<>(configuration.getLastStates().keySet())
         .forEach(k-> configuration.getLastStates().put(k,Configuration.State.SUCCESS));
+    timer.schedule(new TimerTask() {
+      @Override
+      public void run() {
+        configuration.getRepositories().stream().parallel().forEach(r->updateRepository(r));
+        saveConfig();
+      }
+    },0);
     timer.schedule(new Task(), 3000);
   }
 
   @SneakyThrows
-  private void saveConfig(){
+  private synchronized void saveConfig(){
     LOGGER.info("Saving configuration");
     mapper.writeValue(configFile, configuration);
   }
@@ -58,6 +65,10 @@ public class MonitorService {
         .build());
     saveConfig();
     pcs.firePropertyChange("repositories", null, getRepositories());
+  }
+
+  public void updateRepository(Repository repository) {
+    repository.setWorkflows(gh.listWorkflows(new File(repository.getPath())));
   }
 
   public void removeRepositories(List<Repository> repositories) {
@@ -96,10 +107,13 @@ public class MonitorService {
             .forEach(workflow-> {
               var state= gh.queryState(repository, workflow);
               LOGGER.info(workflow.getId()+" "+repository.getPath()+"/"+workflow.getPath()+" State: "+state);
-              state.stream().peek(s->configuration.getLastStates().put(workflow.getId(), s))
+              state.stream()
                   .filter(s ->s != configuration.getLastStates().get(workflow.getId()))
                   .findAny()
-                  .ifPresent(s->workflowsToNotify.put(workflow, Boolean.TRUE));
+                  .ifPresent(s->{
+                    workflowsToNotify.put(workflow, Boolean.TRUE);
+                   configuration.getLastStates().put(workflow.getId(), s);
+                  });
             }));
     saveConfig();
     this.pcs.firePropertyChange("notify", null, workflowsToNotify.keySet());
@@ -115,6 +129,7 @@ public class MonitorService {
 
   public void removeWorkflowToNotify(Workflow workflow) {
     configuration.getWorkflowsToNotify().remove(workflow.getId());
+    configuration.getLastStates().remove(workflow.getId());
     saveConfig();
     pcs.firePropertyChange("workflowsToNotify", null, configuration.getWorkflowsToNotify());
   }
