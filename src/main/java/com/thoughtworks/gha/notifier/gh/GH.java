@@ -68,21 +68,28 @@ public class GH {
     var proc = new ProcessBuilder(executable, "workflow", "view", workflow.getId())
         .directory(new File(repository.getPath())).start();
     var result = new String(proc.getInputStream().readAllBytes());
+//    LOGGER.info("Querying state: "+result);
     var executions = parseExecutions(result);
     var error = new String(proc.getErrorStream().readAllBytes());
     if (!error.isBlank()) {
       LOGGER.severe("Error querying state: " + error);
       throw new GitHubException(error);
     }
+//    executions.forEach(e-> LOGGER.info("Execution: "+e));
     return executions.stream().filter(e-> e.getBranch().equals(workflow.getMainBranch())).findFirst()
-        .map(e-> !Objects.equals(e.getResult(),"success") ? Configuration.State.FAILURE : Configuration.State.SUCCESS);
+        .map(e-> Objects.equals(e.getResult(),"failure") ? Configuration.State.FAILURE : Configuration.State.SUCCESS);
   }
 
   private List<Execution> parseExecutions(String result){
-    result = result.substring(result.indexOf(RECENT_RUNS) + RECENT_RUNS.length());
-    result = result.substring(0, result.indexOf(System.lineSeparator()+System.lineSeparator()));
-    var lines = result.split(System.lineSeparator());
-    return Arrays.stream(lines).map(this::parseLine).filter(Objects::nonNull).toList();
+    try {
+      result = result.substring(result.indexOf(RECENT_RUNS) + RECENT_RUNS.length());
+      result = result.substring(0, result.indexOf(System.lineSeparator() + System.lineSeparator()));
+      var lines = result.split(System.lineSeparator());
+      return Arrays.stream(lines).map(this::parseLine).filter(Objects::nonNull).toList();
+    } catch (Exception e){
+      LOGGER.severe("Error parsing executions: "+result);
+      return Collections.emptyList();
+    }
   }
 
   private Execution parseLine(String line){
@@ -90,13 +97,23 @@ public class GH {
       var parts = line.split("\\s+");
       var execution = new Execution();
       execution.setState(parts[0]);
-      execution.setResult(parts[1]);
+      int messageStart = 2;
+      if(execution.state.equals("in_progress")){
+        messageStart = 1;
+        execution.setResult("running");
+      } else
+      if(execution.getState().equals("waiting")){
+        execution.setResult("success");
+        messageStart = 1;
+      } else {
+        execution.setResult(parts[1]);
+      }
       execution.setTimeStamp(parts[parts.length - 1]);
       execution.setDuration(parts[parts.length - 2]);
       execution.setTrigger(parts[parts.length - 3]);
       execution.setBranch(parts[parts.length - 4]);
       var message = new StringJoiner(" ");
-      Arrays.asList(Arrays.copyOfRange(parts, 2, parts.length - 4)).forEach(message::add);
+      Arrays.asList(Arrays.copyOfRange(parts, messageStart, parts.length - 4)).forEach(message::add);
       execution.setMessage(message.toString());
       return execution;
     } catch (Exception e){

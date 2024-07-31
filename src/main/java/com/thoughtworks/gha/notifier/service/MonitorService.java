@@ -13,10 +13,13 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 
 public class MonitorService {
@@ -84,21 +87,22 @@ public class MonitorService {
 
   private void queryStates(){
     pcs.firePropertyChange("running", null, true);
-    var workflowsToNotify = new LinkedHashSet<Workflow>();
+    var workflowsToNotify = new ConcurrentHashMap<>();
     configuration.getRepositories()
         .forEach(repository -> repository.getWorkflows()
             .stream()
             .filter(this::workflowNotified)
+            .parallel()
             .forEach(workflow-> {
               var state= gh.queryState(repository, workflow);
               LOGGER.info(workflow.getId()+" "+repository.getPath()+"/"+workflow.getPath()+" State: "+state);
               state.stream().peek(s->configuration.getLastStates().put(workflow.getId(), s))
                   .filter(s ->s != configuration.getLastStates().get(workflow.getId()))
                   .findAny()
-                  .ifPresent((s)->workflowsToNotify.add(workflow));
+                  .ifPresent(s->workflowsToNotify.put(workflow, Boolean.TRUE));
             }));
     saveConfig();
-    this.pcs.firePropertyChange("notify", null, workflowsToNotify);
+    this.pcs.firePropertyChange("notify", null, workflowsToNotify.keySet());
   }
 
   public Configuration.State lastState(Workflow workflow){
@@ -140,6 +144,14 @@ public class MonitorService {
 
   public boolean anyFailures() {
     return this.configuration.getLastStates().values().stream().anyMatch(s->s == Configuration.State.FAILURE);
+  }
+
+  public List<Repository> getFailingRepositories() {
+    var failingWorkflows = this.configuration.getLastStates()
+        .entrySet().stream().filter(s->s.getValue() == Configuration.State.FAILURE)
+        .map(Map.Entry::getKey).collect(Collectors.toSet());
+    return configuration.getRepositories()
+        .stream().filter(r->r.getWorkflows().stream().map(Workflow::getId).anyMatch(failingWorkflows::contains)).toList();
   }
 
   class Task extends TimerTask {

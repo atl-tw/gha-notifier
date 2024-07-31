@@ -6,12 +6,10 @@ import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.*;
-import java.awt.event.AWTEventListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.WindowEvent;
 
 public class JTrayIcon extends TrayIcon implements PopupMenuListener, MouseListener {
 

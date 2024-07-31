@@ -35,6 +35,7 @@ public class ConfigurationController {
     monitorService.addPropertyChangeListener("repositories", this::onRepositoriesChange);
     monitorService.addPropertyChangeListener("notify", this::notifyOnStateChange);
     monitorService.addPropertyChangeListener("running", this::onRunning);
+    tray.setOnRepositorySelected(configurationService::browse);
 
     toaster.toastStarted();
     tray.setShowWindow(this::showWindow);
@@ -144,6 +145,7 @@ public class ConfigurationController {
     });
     var anyFailures = monitorService.anyFailures();
     tray.setFailures(anyFailures);
+    tray.setFailingRepositories(monitorService.getFailingRepositories());
   }
 
   private void showWindow() {
