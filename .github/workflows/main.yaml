@@ -304,7 +304,7 @@ jobs:
                   "-Dbrew.arm.asset.hash=$ARM_SHA" \
                   "-Dbrew.x86.asset.url=${{ steps.mac-intel.outputs.browser_download_url}}" \
                   "-Dbrew.x86.asset.hash=$X86_SHA" \
-                   package
+                   -DskipTests=true package
       - name: Publish Homebrew
         env:
           DESTINATION_BRANCH: main
