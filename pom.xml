@@ -15,7 +15,11 @@
         <junit.version>5.10.2</junit.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClassName>com.thoughtworks.gha.notifier.GitHubNotifier</mainClassName>
-        <brew.formula.name>GhaNotifier</brew.formula.name>
+        <brew.formula.name>GitHub Actions Notifier</brew.formula.name>
+        <brew.arm.asset.url>http://arm/url</brew.arm.asset.url>
+        <brew.arm.asset.hash>BBBB</brew.arm.asset.hash>
+        <brew.x86.asset.url>http://x86/url</brew.x86.asset.url>
+        <brew.x86.asset.hash>AAAA</brew.x86.asset.hash>
     </properties>
     <repositories>
         <repository>
@@ -129,9 +133,9 @@
                         <goal>replace</goal>
                     </goals>
                     <configuration>
-                        <file>src/main/brew/Formula.rb</file>
+                        <file>src/main/brew/Cask.rb</file>
                         <outputFile>
-                            target/brew/${project.artifactId}/Formula/${project.artifactId}.rb
+                            target/brew/${project.artifactId}/Casks/${project.artifactId}.rb
                         </outputFile>
                         <replacements>
                             <replacement>
@@ -144,13 +148,23 @@
                             </replacement>
                             <replacement>
                                 <!--suppress UnresolvedMavenProperty -->
-                                <token>@asseturl@</token>
-                                <value>${brew.asset.url}</value>
+                                <token>@armasseturl@</token>
+                                <value>${brew.arm.asset.url}</value>
                             </replacement>
                             <replacement>
                                 <!--suppress UnresolvedMavenProperty -->
-                                <token>@assethash@</token>
-                                <value>${brew.asset.hash}</value>
+                                <token>@armassethash@</token>
+                                <value>${brew.arm.asset.hash}</value>
+                            </replacement>
+                            <replacement>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <token>@x86asseturl@</token>
+                                <value>${brew.x86.asset.url}</value>
+                            </replacement>
+                            <replacement>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <token>@x86assethash@</token>
+                                <value>${brew.x86.asset.hash}</value>
                             </replacement>
                             <replacement>
                                 <!--suppress UnresolvedMavenProperty -->
@@ -176,9 +190,9 @@
                         <goal>replace</goal>
                     </goals>
                     <configuration>
-                        <file>src/main/brew/Formula.rb</file>
+                        <file>src/main/brew/Cask.rb</file>
                         <outputFile>
-                            target/brew/${project.artifactId}/Formula/${project.artifactId}@${project.version}.rb
+                            target/brew/${project.artifactId}/Casks/${project.artifactId}@${project.version}.rb
                         </outputFile>
                         <replacements>
                             <replacement>
@@ -191,13 +205,23 @@
                             </replacement>
                             <replacement>
                                 <!--suppress UnresolvedMavenProperty -->
-                                <token>@asseturl@</token>
-                                <value>${brew.asset.url}</value>
+                                <token>@armasseturl@</token>
+                                <value>${brew.arm.asset.url}</value>
                             </replacement>
                             <replacement>
                                 <!--suppress UnresolvedMavenProperty -->
-                                <token>@assethash@</token>
-                                <value>${brew.asset.hash}</value>
+                                <token>@armassethash@</token>
+                                <value>${brew.arm.asset.hash}</value>
+                            </replacement>
+                            <replacement>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <token>@x86asseturl@</token>
+                                <value>${brew.x86.asset.url}</value>
+                            </replacement>
+                            <replacement>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <token>@x86assethash@</token>
+                                <value>${brew.x86.asset.hash}</value>
                             </replacement>
                             <replacement>
                                 <!--suppress UnresolvedMavenProperty -->
