@@ -196,6 +196,18 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '22'
+          distribution: 'graalvm'
+          github-token: ${{ github.token }}
+      - run: java -version && uname -a
+      - name: Set Version
+        run: |
+          ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
+
+      - name: Download Artifacts
+        uses: actions/checkout@v3
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
@@ -277,3 +289,20 @@ jobs:
           asset_path: ./target/GitHub Actions Notifier-${{ needs.project-info.outputs.PROJECT_VERSION }}.msi
           asset_name: GitHub Actions Notifier-${{ needs.project-info.outputs.PROJECT_VERSION }}.msi
           asset_content_type: application/octet-stream
+      - name: Build Homebrew Formula
+        run: |
+          wget https://github.com/atl-tw/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}/archive/refs/tags/${{ needs.project-info.outputs.PROJECT_VERSION }}.zip
+          ZIP_SHA=$(shasum -a 256 ${{ needs.project-info.outputs.PROJECT_VERSION }}.zip | awk '{print $1}')
+          ./mvnw -s "-Dbrew.asset.url=https://github.com/atl-tw/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}/archive/refs/tags/${{ needs.project-info.outputs.PROJECT_VERSION }}.zip" -Dbrew.asset.hash=$ZIP_SHA --batch-mode package
+      - name: Publish Homebrew
+        env:
+          DESTINATION_BRANCH: main
+          DESTINATION_REPOSITORY: 'atl-tw/homebrew-tap'
+          API_TOKEN_GITHUB: ${{ secrets.MAVEN_TOKEN }}
+          COMMIT_EMAIL: rcooper@thoughtworks.com
+          COMMIT_USERNAME: ${{secrets.MAVEN_USER}}
+          COMMIT_MESSAGE: "Updating ${{ needs.project-info.outputs.PROJECT_ARTIFACT }} to -${{ needs.project-info.outputs.PROJECT_VERSION }}"
+          SOURCE_FILES: 'target/brew/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}/*'
+          DESTINATION_DIRECTORY: ''
+        run: |
+          .github/workflows/deploy-homebrew.sh

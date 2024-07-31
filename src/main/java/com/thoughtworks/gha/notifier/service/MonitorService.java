@@ -26,7 +26,7 @@ public class MonitorService {
   private final File configFile = new File(System.getProperty("user.home"), ".gha-notifier.json");
   private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
   private final ObjectMapper mapper = new ObjectMapper();
-  private final GH gh;
+  private GH gh;
   private Configuration configuration = new Configuration();
   private final Timer timer = new Timer(true);
 
@@ -48,6 +48,10 @@ public class MonitorService {
       }
     },0);
     timer.schedule(new Task(), 3000);
+  }
+
+  void setGH(GH gh){
+    this.gh = gh;
   }
 
   @SneakyThrows

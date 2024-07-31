@@ -7,10 +7,12 @@
     <version>1.0-SNAPSHOT</version>
     <name>gha-notifier</name>
     <url>https://github.com/atl-tw/gha-notifier</url>
+    <description>A desktop notifier for GitHub actions that delegates to the gh command line.</description>
     <properties>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <junit.version>5.10.2</junit.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mainClassName>com.thoughtworks.gha.notifier.GitHubNotifier</mainClassName>
     </properties>
@@ -64,9 +66,30 @@
             <version>3.6</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>1.8.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.truth</groupId>
+            <artifactId>truth</artifactId>
+            <version>1.1.3</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -94,6 +117,108 @@
             </execution>
         </executions>
     </plugin>
+        <plugin>
+            <groupId>com.google.code.maven-replacer-plugin</groupId>
+            <artifactId>maven-replacer-plugin</artifactId>
+            <version>1.3.5</version>
+            <executions>
+                <execution>
+                    <id>prepare-formula</id>
+                    <goals>
+                        <goal>replace</goal>
+                    </goals>
+                    <configuration>
+                        <file>src/main/brew/Formula.rb</file>
+                        <outputFile>
+                            target/brew/${project.artifactId}/Formula/${project.artifactId}.rb
+                        </outputFile>
+                        <replacements>
+                            <replacement>
+                                <token>@artifactId@</token>
+                                <value>${project.artifactId}</value>
+                            </replacement>
+                            <replacement>
+                                <token>@version@</token>
+                                <value>${project.version}</value>
+                            </replacement>
+                            <replacement>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <token>@asseturl@</token>
+                                <value>${brew.asset.url}</value>
+                            </replacement>
+                            <replacement>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <token>@assethash@</token>
+                                <value>${brew.asset.hash}</value>
+                            </replacement>
+                            <replacement>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <token>@name@</token>
+                                <value>${brew.formula.name}</value>
+                            </replacement>
+                            <replacement>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <token>@description@</token>
+                                <value>${project.description}</value>
+                            </replacement>
+                            <replacement>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <token>@homepage@</token>
+                                <value>${project.url}</value>
+                            </replacement>
+                        </replacements>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>prepare-versioned-formula</id>
+                    <goals>
+                        <goal>replace</goal>
+                    </goals>
+                    <configuration>
+                        <file>src/main/brew/Formula.rb</file>
+                        <outputFile>
+                            target/brew/${project.artifactId}/Formula/${project.artifactId}@${project.version}.rb
+                        </outputFile>
+                        <replacements>
+                            <replacement>
+                                <token>@artifactId@</token>
+                                <value>${project.artifactId}</value>
+                            </replacement>
+                            <replacement>
+                                <token>@version@</token>
+                                <value>${project.version}</value>
+                            </replacement>
+                            <replacement>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <token>@asseturl@</token>
+                                <value>${brew.asset.url}</value>
+                            </replacement>
+                            <replacement>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <token>@assethash@</token>
+                                <value>${brew.asset.hash}</value>
+                            </replacement>
+                            <replacement>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <token>@name@</token>
+                                <value>${brew.formula.name}</value>
+                            </replacement>
+                            <replacement>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <token>@description@</token>
+                                <value>${project.description}</value>
+                            </replacement>
+                            <replacement>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <token>@homepage@</token>
+                                <value>${project.url}</value>
+                            </replacement>
+                        </replacements>
+                    </configuration>
+                </execution>
+            </executions>
+
+        </plugin>
     </plugins>
     </build>
 
@@ -260,54 +385,31 @@
             </build>
         </profile>
         <profile>
-            <id>mac-intel</id>
+            <id>mac-noarch</id>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>com.googlecode.maven-download-plugin</groupId>
-                        <artifactId>download-maven-plugin</artifactId>
-                        <version>1.9.0</version>
-                        <executions>
-                            <execution>
-                                <id>download-jre</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>wget</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <url>https://download.bell-sw.com/java/17.0.12+10/bellsoft-jre17.0.12+10-macos-amd64.zip</url>
-                            <unpack>true</unpack>
-                            <outputDirectory>${project.build.directory}/jre-17</outputDirectory>
-                        </configuration>
-                    </plugin>
-                    <!-- We are not using JPackage for Mac OS because this plugin allows us to bundle for any architecture -->
                     <plugin>
                         <groupId>de.perdian.maven.plugins</groupId>
                         <artifactId>macosappbundler-maven-plugin</artifactId>
                         <version>1.20.1</version>
                         <configuration>
-                            <nativeBinary>X86_64</nativeBinary>
                             <plist>
                                 <CFBundleName>GitHub Actions Notifier</CFBundleName>
                                 <CFBundleIconFile>src/bundle/icon.icns</CFBundleIconFile>
                                 <JVMMainClassName>${mainClassName}</JVMMainClassName>
                                 <CFBundleDisplayName>GitHub Actions Notifier</CFBundleDisplayName>
                                 <CFBundleDevelopmentRegion>English</CFBundleDevelopmentRegion>
+                                <JVMRuntimePath>${jvmRuntimePath}</JVMRuntimePath>
                                 <CFBundleURLTypes>
                                     <string>msa</string>
                                 </CFBundleURLTypes>
                                 <JVMVersion>17+</JVMVersion>
                             </plist>
                             <dmg>
-                                <generate>true</generate>
-                                <dmgFileName>gha-notifier-x86_64</dmgFileName>
+                                <generate>false</generate>
                             </dmg>
-                            <jdk>
-                                <include>true</include>
-                                <location>${project.build.directory}/jre-17/jre-17.0.12.jre</location>
-                            </jdk>
+
+
                         </configuration>
                         <executions>
                             <execution>
@@ -321,5 +423,6 @@
                 </plugins>
             </build>
         </profile>
+
     </profiles>
 </project>

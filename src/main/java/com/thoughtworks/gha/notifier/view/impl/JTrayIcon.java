@@ -1,4 +1,4 @@
-package com.thoughtworks.gha.notifier.view;
+package com.thoughtworks.gha.notifier.view.impl;
 
 import com.thoughtworks.gha.notifier.util.SystemUtil;
 

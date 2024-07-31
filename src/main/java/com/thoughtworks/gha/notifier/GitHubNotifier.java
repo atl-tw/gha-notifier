@@ -8,9 +8,9 @@ import com.jthemedetecor.OsThemeDetector;
 import com.thoughtworks.gha.notifier.controller.ConfigurationController;
 import com.thoughtworks.gha.notifier.service.MonitorService;
 import com.thoughtworks.gha.notifier.util.SystemUtil;
-import com.thoughtworks.gha.notifier.view.ConfigurationWindow;
-import com.thoughtworks.gha.notifier.view.Toaster;
-import com.thoughtworks.gha.notifier.view.Tray;
+import com.thoughtworks.gha.notifier.view.impl.ConfigurationWindowImpl;
+import com.thoughtworks.gha.notifier.view.impl.ToasterImpl;
+import com.thoughtworks.gha.notifier.view.impl.TrayImpl;
 import javafx.embed.swing.JFXPanel;
 
 import javax.swing.*;
@@ -29,12 +29,12 @@ public class GitHubNotifier {
 
   private GitHubNotifier() {
     MonitorService monitorService = new MonitorService();
-    ConfigurationWindow configurationWindow = new ConfigurationWindow();
+    ConfigurationWindowImpl configurationWindow = new ConfigurationWindowImpl();
     if (!monitorService.checkGitHub()) {
       configurationWindow.showMessageDialog("GitHub CLI not found. Please select the GitHub icon and locate it on your system.");
     }
-    Toaster toaster = new Toaster();
-    Tray tray = new Tray();
+    ToasterImpl toaster = new ToasterImpl();
+    TrayImpl tray = new TrayImpl();
     this.controller = new ConfigurationController(monitorService, configurationWindow, tray, toaster);
   }
 

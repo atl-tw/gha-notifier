@@ -10,6 +10,7 @@ import com.thoughtworks.gha.notifier.view.Tray;
 
 import java.beans.PropertyChangeEvent;
 import java.util.Set;
+import java.util.List;
 
 import static java.util.Optional.ofNullable;
 
@@ -20,7 +21,7 @@ public class ConfigurationController {
   private final Tray tray;
   private final Toaster toaster;
 
-  private java.util.List<Workflow> selectedWorkflows;
+  private List<Workflow> selectedWorkflows;
   public ConfigurationController(MonitorService configurationService, ConfigurationWindow configurationWindow, Tray tray, Toaster toaster) {
     this.monitorService = configurationService;
     this.configurationWindow = configurationWindow;
@@ -82,7 +83,7 @@ public class ConfigurationController {
   }
 
   private void onRemoveRepositories() {
-    var selected = configurationWindow.getMainForm().getSelectedResponsitories();
+    var selected = configurationWindow.getMainForm().getSelectedRepositories();
     monitorService.removeRepositories(selected);
   }
 
@@ -96,7 +97,7 @@ public class ConfigurationController {
     }
     configurationWindow.getMainForm().showWorkflowConfig();
     var notify = selected.stream().map(monitorService::workflowNotified).reduce((a, b) -> a || b).orElse(false);
-    configurationWindow.getMainForm().setNotify(notify);
+    configurationWindow.getMainForm().setNotifyChecked(notify);
     if (selected.size() == 1) {
       configurationWindow.getMainForm().setOnMainBranchChanged(this::onMainBranchChanged);
       configurationWindow.getMainForm().setMainBranch(selected.get(0).getMainBranch());
@@ -115,7 +116,7 @@ public class ConfigurationController {
   }
 
   private void onRepositoriesSelected() {
-    var selected = configurationWindow.getMainForm().getSelectedResponsitories();
+    var selected = configurationWindow.getMainForm().getSelectedRepositories();
     if (selected == null || selected.size() != 1) {
       configurationWindow.getMainForm().hideDetailsPane();
       return;
