@@ -92,10 +92,10 @@ public class MonitorService {
             .forEach(workflow-> {
               var state= gh.queryState(repository, workflow);
               LOGGER.info(workflow.getId()+" "+repository.getPath()+"/"+workflow.getPath()+" State: "+state);
-              if(state != configuration.getLastStates().get(workflow.getId())){
-                workflowsToNotify.add(workflow);
-              }
-              configuration.getLastStates().put(workflow.getId(), state);
+              state.stream().peek(s->configuration.getLastStates().put(workflow.getId(), s))
+                  .filter(s ->s != configuration.getLastStates().get(workflow.getId()))
+                  .findAny()
+                  .ifPresent((s)->workflowsToNotify.add(workflow));
             }));
     saveConfig();
     this.pcs.firePropertyChange("notify", null, workflowsToNotify);

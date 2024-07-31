@@ -83,6 +83,7 @@ public class MainForm extends JPanel {
       }
       if (onRepositoriesSelected != null) onRepositoriesSelected.run();
     });
+   this.repositories.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     this.workflows.addListSelectionListener(e -> {
       if (e.getValueIsAdjusting()) {
         return;

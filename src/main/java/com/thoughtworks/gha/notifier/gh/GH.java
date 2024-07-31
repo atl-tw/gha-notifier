@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -63,7 +64,7 @@ public class GH {
   }
 
   @SneakyThrows
-  public Configuration.State queryState(Repository repository, Workflow workflow){
+  public Optional<Configuration.State> queryState(Repository repository, Workflow workflow){
     var proc = new ProcessBuilder(executable, "workflow", "view", workflow.getId())
         .directory(new File(repository.getPath())).start();
     var result = new String(proc.getInputStream().readAllBytes());
@@ -74,15 +75,14 @@ public class GH {
       throw new GitHubException(error);
     }
     return executions.stream().filter(e-> e.getBranch().equals(workflow.getMainBranch())).findFirst()
-        .map(e-> e.getResult().equals("failure") ? Configuration.State.FAILURE : Configuration.State.SUCCESS)
-        .orElse(null);
+        .map(e-> !Objects.equals(e.getResult(),"success") ? Configuration.State.FAILURE : Configuration.State.SUCCESS);
   }
 
   private List<Execution> parseExecutions(String result){
     result = result.substring(result.indexOf(RECENT_RUNS) + RECENT_RUNS.length());
     result = result.substring(0, result.indexOf(System.lineSeparator()+System.lineSeparator()));
     var lines = result.split(System.lineSeparator());
-    return Arrays.asList(lines).stream().map(this::parseLine).filter(Objects::nonNull).toList();
+    return Arrays.stream(lines).map(this::parseLine).filter(Objects::nonNull).toList();
   }
 
   private Execution parseLine(String line){

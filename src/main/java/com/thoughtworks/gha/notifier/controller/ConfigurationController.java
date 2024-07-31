@@ -89,7 +89,7 @@ public class ConfigurationController {
     configurationWindow.getMainForm().setOnNotifyChanged(null);
     configurationWindow.getMainForm().setOnMainBranchChanged(null);
     var selected = configurationWindow.getMainForm().getSelectedWorkflows();
-    if (selected == null) {
+    if (selected == null || selected.isEmpty()) {
       configurationWindow.getMainForm().hideWorkflowConfig();
       return;
     }

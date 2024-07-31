@@ -42,8 +42,6 @@ public class JTrayIcon extends TrayIcon implements PopupMenuListener, MouseListe
           menu.setVisible(false);
           dialog.setVisible(false);
         }
-
-
       }
     });
 
