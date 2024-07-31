@@ -293,7 +293,7 @@ jobs:
         run: |
           wget https://github.com/atl-tw/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}/archive/refs/tags/${{ needs.project-info.outputs.PROJECT_VERSION }}.zip
           ZIP_SHA=$(shasum -a 256 ${{ needs.project-info.outputs.PROJECT_VERSION }}.zip | awk '{print $1}')
-          ./mvnw -s "-Dbrew.asset.url=https://github.com/atl-tw/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}/archive/refs/tags/${{ needs.project-info.outputs.PROJECT_VERSION }}.zip" -Dbrew.asset.hash=$ZIP_SHA --batch-mode package
+          ./mvnw  "-Dbrew.asset.url=https://github.com/atl-tw/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}/archive/refs/tags/${{ needs.project-info.outputs.PROJECT_VERSION }}.zip" -Dbrew.asset.hash=$ZIP_SHA --batch-mode package
       - name: Publish Homebrew
         env:
           DESTINATION_BRANCH: main
