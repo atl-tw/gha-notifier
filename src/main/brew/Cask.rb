@@ -7,10 +7,10 @@ cask "@artifactId@" do
     sha256 "@armassethash@"
   else
     url "@x86asseturl@"
-    sha256 :"@x86assethash@"
+    sha256 "@x86assethash@"
   end
 
-  name "@name@""
+  name "@name@"
   homepage "@homepage@" # Replace with the application's homepage
 
   app "@name@.app"
