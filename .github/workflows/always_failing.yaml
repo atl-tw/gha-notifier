@@ -1,0 +1,13 @@
+name: Always Failing Example
+
+on:
+  push:
+    branches: [ "main" ]
+jobs:
+  project-info:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:latest
+    steps:
+      - name: fail
+        run: exit -1
