@@ -54,6 +54,7 @@ public class TrayImpl implements Tray {
       popup.add(label);
       trayIcon.addActionListener(e -> showWindow.run());
 
+
       try {
         tray.add(trayIcon);
       } catch (AWTException ex) {

@@ -28,6 +28,9 @@ public class JTrayIcon extends TrayIcon implements PopupMenuListener, MouseListe
     dialog.setAlwaysOnTop(true);
     dialog.setOpacity(0.05f);
 
+    LightDark.listen(menu);
+
+
     menu.addFocusListener(new FocusListener(){
       @Override
       public void focusGained(FocusEvent e) {

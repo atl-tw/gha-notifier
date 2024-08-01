@@ -20,6 +20,7 @@ public class LightDark {
   static final OsThemeDetector detector = OsThemeDetector.getDetector();
 
   static final java.util.List<JFrame> frames = new ArrayList<>();
+  static final java.util.List<JComponent> components = new ArrayList<>();
 
   public static void init(){
     setTheme(detector.isDark());
@@ -29,6 +30,7 @@ public class LightDark {
         SwingUtilities.updateComponentTreeUI(f);
         f.pack();
       });
+      components.forEach(SwingUtilities::updateComponentTreeUI);
     });
   }
 
@@ -43,6 +45,10 @@ public class LightDark {
 
   public static void listen(JFrame jFrame){
     frames.add(jFrame);
+  }
+
+  public static void listen(JComponent jComponent){
+    components.add(jComponent);
   }
 
 
