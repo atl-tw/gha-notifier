@@ -4,7 +4,6 @@
 
 package com.thoughtworks.gha.notifier.view.impl;
 
-import com.thoughtworks.gha.notifier.GitHubNotifier;
 import com.thoughtworks.gha.notifier.model.Repository;
 import com.thoughtworks.gha.notifier.model.Workflow;
 import com.thoughtworks.gha.notifier.view.MainForm;
@@ -55,12 +54,10 @@ public class MainFormImpl extends JPanel implements MainForm {
 
   public MainFormImpl() {
     initComponents();
-    var addImage = Toolkit.getDefaultToolkit().getImage(GitHubNotifier.class.getResource("/add.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
-    var removeImage = Toolkit.getDefaultToolkit().getImage(GitHubNotifier.class.getResource("/remove.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
-    var ghImage = Toolkit.getDefaultToolkit().getImage(GitHubNotifier.class.getResource("/github.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH);
-    this.add.setIcon(new ImageIcon(addImage));
-    this.remove.setIcon(new ImageIcon(removeImage));
-    this.gh.setIcon(new ImageIcon(ghImage));
+    LightDark.register("/add-", ".png", 16, 16, image-> this.add.setIcon(new ImageIcon(image)));
+    LightDark.register("/remove-", ".png", 16, 16, image-> this.remove.setIcon(new ImageIcon(image)));
+    LightDark.register("/github-", ".png", 16, 16, image-> this.gh.setIcon(new ImageIcon(image)));
+
     this.add.addActionListener(e -> {
       if(onAddRepository != null)
         onAddRepository.run();

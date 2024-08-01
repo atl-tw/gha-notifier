@@ -205,7 +205,6 @@ jobs:
       - name: Set Version
         run: |
           ./mvnw -U --batch-mode versions:set dependency:tree -DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}
-
       - name: Download Artifacts
         uses: actions/checkout@v3
       - name: Download All Artifacts
@@ -299,12 +298,12 @@ jobs:
         run: |
           ARM_SHA=$(shasum -a 256 ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-ARM_64_${{ needs.project-info.outputs.PROJECT_VERSION }}.dmg | awk '{print $1}')
           X86_SHA=$(shasum -a 256 ./target/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}-x86_64_${{ needs.project-info.outputs.PROJECT_VERSION }}.dmg | awk '{print $1}')
-          ./mvnw --batch-mode --batch-mode  versions:set "-DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}"
+          ./mvnw --batch-mode versions:set "-DnewVersion=${{ needs.project-info.outputs.PROJECT_VERSION }}"
           ./mvnw  "-Dbrew.arm.asset.url=${{ steps.mac-arm.outputs.browser_download_url}}" \
                   "-Dbrew.arm.asset.hash=$ARM_SHA" \
                   "-Dbrew.x86.asset.url=${{ steps.mac-intel.outputs.browser_download_url}}" \
                   "-Dbrew.x86.asset.hash=$X86_SHA" \
-                   -DskipTests=true package
+                   -DskipTests=true -batch-mode package
       - name: Publish Homebrew
         env:
           DESTINATION_BRANCH: main
@@ -312,7 +311,7 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.MAVEN_TOKEN }}
           COMMIT_EMAIL: rcooper@thoughtworks.com
           COMMIT_USERNAME: ${{secrets.MAVEN_USER}}
-          COMMIT_MESSAGE: "Updating ${{ needs.project-info.outputs.PROJECT_ARTIFACT }} to -${{ needs.project-info.outputs.PROJECT_VERSION }}"
+          COMMIT_MESSAGE: "Updating ${{ needs.project-info.outputs.PROJECT_ARTIFACT }} to ${{ needs.project-info.outputs.PROJECT_VERSION }}"
           SOURCE_FILES: 'target/brew/${{ needs.project-info.outputs.PROJECT_ARTIFACT }}/*'
           DESTINATION_DIRECTORY: ''
         run: |

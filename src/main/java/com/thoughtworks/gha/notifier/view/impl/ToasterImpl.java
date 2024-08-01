@@ -42,7 +42,7 @@ public class ToasterImpl implements Toaster {
   public void toastStarted() {
     Toast.builder()
         .type(ToastType.INFO)
-        .icon(Objects.requireNonNull(GitHubNotifier.class.getResource(BUILD_PNG)).toString())
+        .icon(Objects.requireNonNull(GitHubNotifier.class.getResource("/atl-tw.png")).toString())
         .title(GIT_HUB_NOTIFIER).content("Started")
         .timeout(3)
         .toast();

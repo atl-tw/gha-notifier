@@ -32,7 +32,7 @@ public class TrayImpl implements Tray {
   public TrayImpl() {
     if (SystemTray.isSupported()) {
       SystemTray tray = SystemTray.getSystemTray();
-      Image image = Toolkit.getDefaultToolkit().getImage(GitHubNotifier.class.getResource(BUILD_PNG));
+      Image image = Toolkit.getDefaultToolkit().getImage(GitHubNotifier.class.getResource("/atl-tw.png"));
 
       this.trayIcon = new JTrayIcon(image, GIT_HUB_NOTIFIER, popup);
       trayIcon.setImageAutoSize(true);

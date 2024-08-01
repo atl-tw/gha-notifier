@@ -33,6 +33,7 @@ public class ConfigurationWindowImpl extends JFrame implements ConfigurationWind
         setVisible(false);
       }
     });
+    LightDark.listen(this);
   }
 
   public MainForm getMainForm(){
